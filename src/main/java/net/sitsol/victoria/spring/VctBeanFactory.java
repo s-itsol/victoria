@@ -3,13 +3,13 @@
  */
 package net.sitsol.victoria.spring;
 
-import net.sitsol.victoria.exceptions.VctRuntimeException;
-import net.sitsol.victoria.log4j.VctLogger;
-import net.sitsol.victoria.utils.VctStopWatch;
-
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+
+import net.sitsol.victoria.exceptions.VctRuntimeException;
+import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.utils.VctStopWatch;
 
 /**
  * ビーンファクトリークラス
@@ -28,12 +28,14 @@ public class VctBeanFactory extends XmlBeanFactory {
 	 * インスタンス取得
 	 * @return ビーンファクトリーのインスタンス
 	 */
-	public static VctBeanFactory getInstance(){
+	public static VctBeanFactory getInstance() {
+
 		// 生成されていない場合
 		if (instance_ == null) {
 			// デフォルト設定ファイルパスを使って初期処理
 			initialize();
 		}
+
 		return instance_;
 	}
 
@@ -51,7 +53,9 @@ public class VctBeanFactory extends XmlBeanFactory {
 	 * @param appContextXmlFilePath コンテキスト設定ファイル(≒app-context.xml)のファイルパス
 	 */
 	public static void initialize(String appContextXmlFilePath) {
+
 		try {
+
 			VctStopWatch stopWatch = new VctStopWatch();
 
 			// XMLファイルから設定を読み込む
