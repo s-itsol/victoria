@@ -3,22 +3,15 @@
  */
 package net.sitsol.victoria.threads;
 
-import java.io.Closeable;
-
 import net.sitsol.victoria.log4j.VctLogger;
 
 /**
  * マルチスレッドによる同期型分散実行を支援する抽象クラス
- *  Closeableインタフェースを継承しているので
+ *  AutoCloseableインタフェースを継承し、colseメソッドで各スレッドの終了を待つので、
  *  「
- *    ExMultiThreadExecuter<String> executer = null;
- *    try {
- *        executer = new ExMultiThreadExecuter
-          …
- *    } finally {
- *        if ( executer != null ) {
- *            executer.close();
- *        }
+ *    try( ExMultiThreadExecuter<String> executer = ExMultiThreadExecuter(3) ) {
+ *       // 各スレッドの処理
+ *        …
  *    }
  *  」
  *  とすることで同期型処理になります。
@@ -26,7 +19,7 @@ import net.sitsol.victoria.log4j.VctLogger;
  * @param <ParamClass> スレッド実行パラメータクラス型
  * @author shibano
  */
-public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
+public abstract class BsMultiThreadExecuter<ParamClass> implements AutoCloseable {
 
 	// ------------------------------------------------------------------------
 	//  field
@@ -47,6 +40,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
      */
     @SuppressWarnings("unchecked")
 	public BsMultiThreadExecuter(int maxThreadCount) {
+
         // 同期型マルチスレッド分散処理の開始ログ
         VctLogger.getLogger().info("同期型分散処理を開始します。最大スレッド数：[" + maxThreadCount + "]");
 
@@ -55,6 +49,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
 
         // 最大スレッド数の配列を確保
         this.threadExecuters_ = new BsThreadExecuter[maxThreadCount];
+
         // スレッドを生成・開始して配列に格納
         for ( int idx = 0; idx < maxThreadCount; idx++ ) {
             this.threadExecuters_[idx] = this.createThreadExecuter(idx + 1);
@@ -67,12 +62,15 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
      * @param param 汎用パラメータ
      */
     public void requestExecute(ParamClass param) {
+
         BsThreadExecuter<ParamClass> thread = null;
 
         // スレッド実行待ちループ
         for (;;) {
+
             // 空きスレッド取得
             thread = this.getFreeThread();
+
             // 空きスレッドがあったらループ終了
             if ( thread != null ) {
                 break;
@@ -81,6 +79,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
             // スレッドが空くのを待つ
             try {
             	Thread.sleep(10);
+
         	} catch (Exception ex) {
         		// エラーログを出力して処理は継続
         		VctLogger.getLogger().error("マルチスレッド空き状態待ちスリープ処理でエラーが発生しました。", ex);
@@ -112,8 +111,11 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
 
     /**
      * 終了処理
+     *  各スレッドの終了待ちと件数集計を行ったのち、スレッド結果をログ出力して終了します。
      */
+    @Override
     public void close() {
+
         // 未集計(＝終了要求が未実施)の場合
         if (this.totalExecCount_ == 0 && this.totalErrorCount_ == 0) {
             // 終了要求
@@ -121,16 +123,16 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
         }
 
         // 同期型マルチスレッド分散処理の終了ログ
-        VctLogger.getLogger().info(
-            "同期型分散処理を終了しました。エラー件数／実行件数：[" + this.totalErrorCount_ + "／" + this.totalExecCount_ + "]");
+        VctLogger.getLogger().info("同期型分散処理を終了しました。エラー件数／実行件数：[" + this.totalErrorCount_ + "／" + this.totalExecCount_ + "]");
     }
 
     /**
      * 終了要求
      *  各スレッドの終了待ちと件数集計を行います。
-     *  インスタンスを破棄する前に件数を取得したい場合に明示的に呼び出してください。
+     *  インスタンスを破棄する前に件数を取得したい場合、closeメソッドではなく、こちらを明示的に呼び出してください。
      */
     public void requestClose() {
+
         // 全スレッド終了要求
         for ( BsThreadExecuter<ParamClass> thread : this.threadExecuters_ ) {
             thread.close();
@@ -138,6 +140,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
 
         // 全スレッドが完了するまで待つ
         for (;;) {
+
             if ( this.isAllCompleted() ) {
                 break;
             }
@@ -168,6 +171,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements Closeable {
      * 全スレッドの完了判定
      */
     private boolean isAllCompleted() {
+
         boolean isAllCompleted = true;
 
         // スレッド検査ループ

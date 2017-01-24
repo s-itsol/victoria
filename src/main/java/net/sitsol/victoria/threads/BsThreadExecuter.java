@@ -91,7 +91,9 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
     /**
      * 終了処理
      */
+    @Override
     public void close() {
+
         if ( this.isCompleted() ) {
             return;
         }
@@ -108,8 +110,10 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
      *  ※スリープを繰り返す
      */
     private void waitStatusFree() {
+
         // スレッドが要求待ちに戻るまで待つ
         for (;;) {
+
             if ( this.isFree() ) {
                 break;
             }
@@ -129,6 +133,7 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
      * @return ※true：空き状態
      */
     public boolean isFree() {
+
         // ステータスが要求待ちの場合のみ「空き状態」と判定する
     	if ( ThreadStatus.Wait.equals(this.status_) ) {
             return true;
@@ -142,6 +147,7 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
      * @return >※true：完了している
      */
     public boolean isCompleted() {
+
         // ステータスが終了の場合のみ「完全に終了した状態」と判定する
     	if ( ThreadStatus.End.equals(this.status_) ) {
             return true;
@@ -159,6 +165,7 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
      * スレッド実行処理
      */
     public void run() {
+
         // スレッド開始ログ出力
         VctLogger.getLogger().info("スレッドを開始します。"
                                 + "スレッド番号：[" + this.threadNo_ + "]"
@@ -167,8 +174,10 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 
         // ステータス変更監視ループ
         for (;;) {
+
             // 実行要求
             if ( ThreadStatus.Requested.equals(this.status_) ) {
+
                 // ステータスを実行中にする
                 this.status_ = ThreadStatus.Active;
 
@@ -177,34 +186,35 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
                     this.execCount_++;
                     // 本処理の実行
                     this.doWokerThreadExecute(this.executeParam_);
-                }
-                catch (Exception ex) {
+
+                } catch (Exception ex) {
                     // エラー件数をカウント
                     this.errorCount_++;
 
                     // エラーログを出力してスレッドは継続させる
                     VctLogger.getLogger().error("スレッド処理実行中にエラーが発生しました。"
-                                            + "スレッド番号：[" + this.threadNo_ + "]"
-                                            + ", スレッド型：[" + this.threadTypeName_ + "]"
-                                        , ex
-                                    );
-                }
-                finally {
+                    									+ "スレッド番号：[" + this.threadNo_ + "]"
+                    									+ ", スレッド型：[" + this.threadTypeName_ + "]"
+                    								, ex
+                                    			);
+
+                } finally {
                     // 正常終了／エラー終了 問わず、ステータスを実行待ちに戻す
                     if ( ThreadStatus.Active.equals(this.status_) ) {
                         this.executeParam_ = null;
                         this.status_ = ThreadStatus.Wait;
                     }
                 }
-            }
+
             // 終了要求
-            else if ( ThreadStatus.EndRequest.equals(this.status_) ) {
+            } else if ( ThreadStatus.EndRequest.equals(this.status_) ) {
                 break;
             }
 
             // 実行要求・実行終了待ち
             try {
             	Thread.sleep(10);
+
         	} catch (Exception ex) {
         		// エラーログを出力して処理は継続
         		VctLogger.getLogger().error("スレッド実行要求・実行終了待ちスリープ処理でエラーが発生しました。", ex);
@@ -213,10 +223,10 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 
         // スレッド終了ログ出力
         VctLogger.getLogger().info("スレッドを終了します。"
-                                + "スレッド番号：[" + this.threadNo_ + "]"
-                                + ", スレッド型：[" + this.threadTypeName_ + "]"
-                                + ", エラー件数／実行件数：[" + this.errorCount_ + "／" + this.execCount_ + "]"
-                            );
+                                		+ "スレッド番号：[" + this.threadNo_ + "]"
+                                		+ ", スレッド型：[" + this.threadTypeName_ + "]"
+                                		+ ", エラー件数／実行件数：[" + this.errorCount_ + "／" + this.execCount_ + "]"
+                            		);
 
         // ステータスを終了にする
         this.status_ = ThreadStatus.End;
@@ -225,7 +235,7 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
     /**
      * ワーカースレッド実行処理の本体
      *  ※派生クラス側で継承して実装する
-     *  @param executeParam 汎用パラメータ
+     *  @param executeParam スレッド実行パラメータ
      */
     protected abstract void doWokerThreadExecute(ParamClass executeParam);
 
