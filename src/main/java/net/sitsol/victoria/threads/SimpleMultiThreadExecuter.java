@@ -25,7 +25,6 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 	 * スレッド実行クラスのインスタンス化
 	 * @param threadNo スレッド番号
 	 */
-	@SuppressWarnings("resource")
 	@Override
 	protected BsThreadExecuter<ParamClass> createThreadExecuter(int threadNo) {
 
