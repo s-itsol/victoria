@@ -13,10 +13,10 @@ package net.sitsol.victoria.threads;
  */
 public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThreadExecuter<ParamClass> {
 
-    /**
-     * コンストラクタ
-     * @param maxThreadCount 最大同時実行スレッド数
-     */
+	/**
+	 * コンストラクタ
+	 * @param maxThreadCount 最大同時実行スレッド数
+	 */
 	public SimpleMultiThreadExecuter(int maxThreadCount) {
 		super(maxThreadCount);
 	}
@@ -43,7 +43,7 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 			@Override
 			protected void doWokerThreadExecute(ParamClass executeParam) {
 				// スレッド実行処理
-				multiThreadExecuter.doWokerThreadExecute(this.getThreadNo_(), executeParam);
+				multiThreadExecuter.doWokerThreadExecute(this.getThreadNo(), executeParam);
 			}
 		};
 
@@ -51,12 +51,12 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 		return threadExecuter;
 	}
 
-    /**
-     * スレッド実行処理コールバック
-     *  ※派生クラス側で継承して実装する
-     *  @param threadNo スレッド番号
-     *  @param executeParam スレッド実行パラメータ
-     */
-    protected abstract void doWokerThreadExecute(int threadNo, ParamClass executeParam);
+	/**
+	 * スレッド実行処理コールバック
+	 *  ※派生クラス側で継承して実装する
+	 *  @param threadNo スレッド番号
+	 *  @param executeParam スレッド実行パラメータ
+	 */
+	protected abstract void doWokerThreadExecute(int threadNo, ParamClass executeParam);
 
 }
