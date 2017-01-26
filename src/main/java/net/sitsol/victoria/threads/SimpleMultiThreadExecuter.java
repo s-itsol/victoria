@@ -51,6 +51,19 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 	}
 
 	/**
+	 * 全スレッド実行完了イベント通知
+	 *  ※エラーあり終了を検知したい場合など、必要応じて派生クラス側で継承して実装する
+	 * @param totalExecCount 処理実行件数
+	 * @param totalErrorCount エラー件数
+	 */
+	@Override
+	protected void noticeAllThreadCompleted(int totalExecCount, int totalErrorCount) {
+		super.noticeAllThreadCompleted(totalExecCount, totalErrorCount);
+		
+		// ※無名クラスでインスタンス化したアプリロジック側から追いやすいようにオーバーライドしただけ
+	}
+
+	/**
 	 * スレッド実行処理コールバック
 	 *  ※派生クラス側で継承して実装する
 	 *  @param threadNo スレッド番号
