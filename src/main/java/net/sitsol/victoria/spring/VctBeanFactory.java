@@ -14,8 +14,8 @@ import net.sitsol.victoria.utils.VctStopWatch;
 /**
  * ビーンファクトリークラス
  *  ※アプリケーション・コンテキストとなりうる
- * @author shibano
  *
+ * @author shibano
  */
 public class VctBeanFactory extends XmlBeanFactory {
 

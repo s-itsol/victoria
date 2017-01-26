@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.sitsol.victoria.log4j;
 
@@ -9,7 +9,8 @@ import org.apache.log4j.spi.TriggeringEventEvaluator;
 
 /**
  * org.apache.log4j.spi.TriggeringEventEvaluatorインターフェースを継承してvictoria用の実装を施したクラス
- * @author rei_shibano
+ *
+ * @author shibano
  */
 public class DefaultEvaluator implements TriggeringEventEvaluator {
 
@@ -22,7 +23,7 @@ public class DefaultEvaluator implements TriggeringEventEvaluator {
 		if ( Level.ERROR.toInt() > event.getLevel().toInt() ) {
 			return false;
 		}
-		
+
 		return true;
 	}
 

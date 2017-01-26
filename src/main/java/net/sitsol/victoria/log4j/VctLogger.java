@@ -9,9 +9,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * ロガークラス
- * @author shibano
+ * victoria用ロガークラス
  *
+ * @author shibano
  */
 public class VctLogger extends Logger {
 

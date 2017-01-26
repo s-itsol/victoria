@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.sitsol.victoria.log4j;
 
@@ -7,22 +7,22 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggerFactory;
 
 /**
- * ログファクトリクラス
- * @author shibano
+ * victoria用ログファクトリクラス
  *
+ * @author shibano
  */
 public class VctLoggerFactory implements LoggerFactory {
 
 	// ------------------------------------------------------------------------
 	//  method
 	// ------------------------------------------------------------------------
-	
+
 	/**
 	 * コンストラクタ
 	 */
 	public VctLoggerFactory() {}
 
-	
+
 	/* -- orverride -------------------------------------------------------- */
 
 	/**

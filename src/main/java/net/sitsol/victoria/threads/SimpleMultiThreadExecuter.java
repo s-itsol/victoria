@@ -9,7 +9,7 @@ package net.sitsol.victoria.threads;
  *  実装するだけで使えるようにしています。
  *
  * @param <ParamClass> スレッド実行パラメータクラス型
- * @author rei_shibano
+ * @author shibano
  */
 public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThreadExecuter<ParamClass> {
 
@@ -25,6 +25,7 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 	 * スレッド実行クラスのインスタンス化
 	 * @param threadNo スレッド番号
 	 */
+	@SuppressWarnings("resource")
 	@Override
 	protected BsThreadExecuter<ParamClass> createThreadExecuter(int threadNo) {
 
@@ -59,7 +60,7 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 	@Override
 	protected void noticeAllThreadCompleted(int totalExecCount, int totalErrorCount) {
 		super.noticeAllThreadCompleted(totalExecCount, totalErrorCount);
-		
+
 		// ※無名クラスでインスタンス化したアプリロジック側から追いやすいようにオーバーライドしただけ
 	}
 

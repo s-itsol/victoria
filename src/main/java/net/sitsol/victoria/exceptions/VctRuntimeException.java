@@ -1,33 +1,33 @@
 /**
- * 
+ *
  */
 package net.sitsol.victoria.exceptions;
 
 
 /**
  * ランタイム例外クラス
- * @author shibano
  *
+ * @author shibano
  */
 public class VctRuntimeException extends RuntimeException {
-	
+
 	/* -- static ----------------------------------------------------------- */
-	
+
 	private static final long serialVersionUID = 6487660868566987247L;
 	public static final int DEFAULT_ERROR_CODE = 100;						// デフォルトエラーコード
-	
-	
+
+
 	// ------------------------------------------------------------------------
 	//  field
 	// ------------------------------------------------------------------------
-	
+
 	private int errorCode_;	// エラーコード
-	
-	
+
+
 	// ------------------------------------------------------------------------
 	//  method
 	// ------------------------------------------------------------------------
-	
+
 	/**
 	 * コンストラクタ
 	 * @param message エラーメッセージ
@@ -35,7 +35,7 @@ public class VctRuntimeException extends RuntimeException {
 	public VctRuntimeException(String message) {
 		this(message, DEFAULT_ERROR_CODE, null);
 	}
-	
+
 	/**
 	 * コンストラクタ
 	 * @param message 		エラーメッセージ
