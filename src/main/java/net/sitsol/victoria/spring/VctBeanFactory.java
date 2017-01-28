@@ -31,7 +31,7 @@ public class VctBeanFactory extends XmlBeanFactory {
 	public static VctBeanFactory getInstance() {
 
 		// 生成されていない場合
-		if (instance_ == null) {
+		if ( instance_ == null ) {
 			// デフォルト設定ファイルパスを使って初期処理
 			initialize();
 		}

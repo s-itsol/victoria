@@ -22,12 +22,10 @@ public class VctLoggerFactory implements LoggerFactory {
 	 */
 	public VctLoggerFactory() {}
 
-
-	/* -- orverride -------------------------------------------------------- */
-
 	/**
 	 * ロガーインスタンスの生成
 	 */
+	@Override
 	public Logger makeNewLoggerInstance(String loggerName) {
 		// フレームワークのロガーを生成して返す
 		return new VctLogger(loggerName);

@@ -10,8 +10,8 @@ import org.apache.commons.lang.time.StopWatch;
 
 /**
  * 処理時間計測用のストップウォッチクラス
- * @author shibano
  *
+ * @author shibano
  */
 public class VctStopWatch {
 

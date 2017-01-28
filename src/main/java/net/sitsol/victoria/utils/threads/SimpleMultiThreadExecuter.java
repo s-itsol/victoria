@@ -1,7 +1,7 @@
 /**
  *
  */
-package net.sitsol.victoria.threads;
+package net.sitsol.victoria.utils.threads;
 
 /**
  * マルチスレッドによる同期型分散実行を支援する抽象クラス-簡易版

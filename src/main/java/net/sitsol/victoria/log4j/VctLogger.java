@@ -3,10 +3,10 @@
  */
 package net.sitsol.victoria.log4j;
 
-import net.sitsol.victoria.utils.VctStopWatch;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+
+import net.sitsol.victoria.utils.VctStopWatch;
 
 /**
  * victoria用ロガークラス

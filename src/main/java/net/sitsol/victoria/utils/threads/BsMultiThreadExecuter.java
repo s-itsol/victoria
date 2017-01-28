@@ -1,7 +1,7 @@
 /**
  *
  */
-package net.sitsol.victoria.threads;
+package net.sitsol.victoria.utils.threads;
 
 import net.sitsol.victoria.log4j.VctLogger;
 

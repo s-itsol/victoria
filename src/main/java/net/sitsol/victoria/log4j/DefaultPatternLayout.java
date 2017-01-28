@@ -13,6 +13,7 @@ import org.apache.log4j.PatternLayout;
  *  %d：出力日時ミリ秒(yyyy-mm-dd hh:mm:ss,sss)
  *  %p：ログレベル文字列
  *  %t：スレッド名称
+ *  %x：ネスト化診断コンテキスト(≒追加情報)
  *  %l：出力処理位置 ※「パッケージ(クラス:行番号)」形式
  *  %m：ログメッセージ本文
  *  %n：改行(CRが付くか否かはOS依存？)
@@ -29,7 +30,7 @@ public class DefaultPatternLayout extends PatternLayout {
 		super();
 
 		// 基本的なパラメータをここでまとめて実装
-		this.setConversionPattern("[%d],[%p],[%t],[%l], %m%n");
+		this.setConversionPattern("[%d],[%p],[%t],[%x],[%l], %m%n");
 	}
 
 }

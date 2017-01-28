@@ -5,16 +5,17 @@ package net.sitsol.victoria.configs;
 
 import java.io.Serializable;
 
-import net.sitsol.victoria.spring.VctBeanFactory;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 
+import net.sitsol.victoria.spring.VctBeanFactory;
+
 /**
- * victoriaで共通なアプリケーション・パラメータを定義する。
- * 独自なパラメータは各プロジェクトで派生させて定義すること。
- * また、各プロジェクトの独自仕様でvictoria用のデフォルト値以外の値を使いたい場合は、
- * getterメソッドをオーバーライドして実装することを想定している。
+ * 静的アプリケーション・パラメータクラス
+ *  victoriaで共通なアプリケーション・パラメータを定義する。
+ *  独自なパラメータは各プロジェクトで派生させて定義すること。
+ *  また、各プロジェクトの独自仕様でvictoria用のデフォルト値以外の値を使いたい場合は、
+ *  getterメソッドをオーバーライドして実装することを想定している。
  *
  * @author shibano
  */
@@ -23,14 +24,15 @@ public class VctInitApParam implements Serializable {
 	/* -- static ----------------------------------------------------------- */
 
 	private static final long serialVersionUID = 759495219902390118L;
-	public static String APP_CONTEXT_NAME = "InitApParam";			// application-context.xmlで参照するビーン名
+	public static String SPRING_BEAN_NAME = "InitApParam";			// Springで管理されるこのクラスのビーン名
 
 	/**
-	 * アプリケーションで唯一のインスタンスを取得する
+	 * インスタンスの取得
 	 *  ※派生クラスでは、本メソッドをオーバーロードしてキャストするだけでインスタンスを取得することができるように想定
+	 * @return 本クラスのインスタンス
 	 */
 	public static VctInitApParam getInstance() {
-		return (VctInitApParam) VctBeanFactory.getInstance().getBean(VctInitApParam.APP_CONTEXT_NAME, VctInitApParam.class);
+		return (VctInitApParam) VctBeanFactory.getInstance().getBean(VctInitApParam.SPRING_BEAN_NAME, VctInitApParam.class);
 	}
 
 

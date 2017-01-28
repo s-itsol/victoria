@@ -1,11 +1,16 @@
 /**
  *
  */
-package net.sitsol.victoria.threads;
+package net.sitsol.victoria.utils.threads;
 
 import java.io.Closeable;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.NDC;
+
 import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.models.userinfo.IUserInfo;
+import net.sitsol.victoria.threadlocals.ThreadUserInfo;
 
 /**
  * スレッド実行を支援する抽象クラス
@@ -39,14 +44,15 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 		End
 	}
 
-	private Thread thread = null;		  		// スレッドクラス
-	private ThreadStatus status = null;		// スレッド状態
-	private int threadNo = 0;					// スレッド番号
-	private String threadTypeName = null;		// スレッドクラス名
-	private ParamClass executeParam = null;	// 実行時の汎用パラメータ
+	private Thread thread = null;		  			// スレッドクラス
+	private ThreadStatus status = null;			// スレッド状態
+	private int threadNo = 0;						// スレッド番号
+	private String threadTypeName = null;			// スレッドクラス名
+	private IUserInfo mainThreadUserInfo = null;	// メインスレッドのユーザー情報
+	private ParamClass executeParam = null;		// 実行時の汎用パラメータ
 
-	private int execCount = 0;					// 処理実行件数
-	private int errorCount = 0;				// エラー件数
+	private int execCount = 0;						// 処理実行件数
+	private int errorCount = 0;					// エラー件数
 
 
 	// ------------------------------------------------------------------------
@@ -58,9 +64,10 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 	 * @param threadNo スレッド番号 ※マルチスレッド用にログ出力に使うだけ
 	 */
 	public BsThreadExecuter(int threadNo) {
-		// メンバ変数の初期化
+		// フィールド値の初期化
 		this.threadNo = threadNo;
 		this.threadTypeName = this.getClass().getSimpleName();
+		this.mainThreadUserInfo = ThreadUserInfo.getCurrentThreadUserInfo();
 
 		this.status = ThreadStatus.Wait;
 		this.executeParam = null;
@@ -166,70 +173,84 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 	 */
 	public void run() {
 
-		// スレッド開始ログ出力
-		VctLogger.getLogger().info("スレッドを開始します。"
-								+ "スレッド番号：[" + this.getThreadNo() + "]"
-								+ ", スレッド型：[" + this.getThreadTypeName() + "]"
-							);
+		IUserInfo mainThreadUserInfo = this.getMainThreadUserInfo();
+		String userId = mainThreadUserInfo != null ? mainThreadUserInfo.getUserId() : StringUtils.EMPTY;
 
-		// ステータス変更監視ループ
-		for (;;) {
+		// ユーザーIDをlog4jネスト化診断コンテキストに保持 TODO：こちらもAutoCloseにする
+		NDC.push(userId);
 
-			// 実行要求
-			if ( ThreadStatus.Requested.equals(this.getStatus()) ) {
+		// メインスレッドのユーザー情報を引き継ぎ
+		try ( ThreadUserInfo threadUserInfo = new ThreadUserInfo(mainThreadUserInfo) ) {
 
-				// ステータスを実行中にする
-				this.status = ThreadStatus.Active;
+			// スレッド開始ログ出力
+			VctLogger.getLogger().info("スレッドを開始します。"
+									+ "スレッド番号：[" + this.getThreadNo() + "]"
+									+ ", スレッド型：[" + this.getThreadTypeName() + "]"
+								);
 
-				try {
-					// 実行件数をカウント
-					this.execCount++;
-					// 本処理の実行
-					this.doWokerThreadExecute(this.getExecuteParam());
+			// ステータス変更監視ループ
+			for (;;) {
 
-				} catch (Exception ex) {
-					// エラー件数をカウント
-					this.errorCount++;
+				// 実行要求
+				if ( ThreadStatus.Requested.equals(this.getStatus()) ) {
 
-					// エラーログを出力してスレッドは継続させる
-					VctLogger.getLogger().error("スレッド処理実行中にエラーが発生しました。"
-														+ "スレッド番号：[" + this.threadNo + "]"
-														+ ", スレッド型：[" + this.threadTypeName + "]"
-													, ex
-												);
+					// ステータスを実行中にする
+					this.status = ThreadStatus.Active;
 
-				} finally {
-					// 正常終了／エラー終了 問わず、ステータスを実行待ちに戻す
-					if ( ThreadStatus.Active.equals(this.status) ) {
-						this.executeParam = null;
-						this.status = ThreadStatus.Wait;
+					try {
+						// 実行件数をカウント
+						this.execCount++;
+						// 本処理の実行
+						this.doWokerThreadExecute(this.getExecuteParam());
+
+					} catch (Exception ex) {
+						// エラー件数をカウント
+						this.errorCount++;
+
+						// エラーログを出力してスレッドは継続させる
+						VctLogger.getLogger().error("スレッド処理実行中にエラーが発生しました。"
+															+ "スレッド番号：[" + this.threadNo + "]"
+															+ ", スレッド型：[" + this.threadTypeName + "]"
+														, ex
+													);
+
+					} finally {
+						// 正常終了／エラー終了 問わず、ステータスを実行待ちに戻す
+						if ( ThreadStatus.Active.equals(this.status) ) {
+							this.executeParam = null;
+							this.status = ThreadStatus.Wait;
+						}
 					}
+
+				// 終了要求
+				} else if ( ThreadStatus.EndRequest.equals(this.status) ) {
+					break;
 				}
 
-			// 終了要求
-			} else if ( ThreadStatus.EndRequest.equals(this.status) ) {
-				break;
+				// 実行要求・実行終了待ち
+				try {
+					Thread.sleep(10);
+
+				} catch (Exception ex) {
+					// エラーログを出力して処理は継続
+					VctLogger.getLogger().error("スレッド実行要求・実行終了待ちスリープ処理でエラーが発生しました。", ex);
+				}
 			}
 
-			// 実行要求・実行終了待ち
-			try {
-				Thread.sleep(10);
+			// スレッド終了ログ出力
+			VctLogger.getLogger().info("スレッドを終了します。"
+											+ "スレッド番号：[" + this.threadNo + "]"
+											+ ", スレッド型：[" + this.threadTypeName + "]"
+											+ ", エラー件数／実行件数：[" + this.errorCount + "／" + this.execCount + "]"
+										);
 
-			} catch (Exception ex) {
-				// エラーログを出力して処理は継続
-				VctLogger.getLogger().error("スレッド実行要求・実行終了待ちスリープ処理でエラーが発生しました。", ex);
-			}
+			// ステータスを終了にする
+			this.status = ThreadStatus.End;
+
+		} finally {
+			// 現在スレッドのlog4jネスト化診断コンテキストを破棄
+			NDC.remove();
 		}
-
-		// スレッド終了ログ出力
-		VctLogger.getLogger().info("スレッドを終了します。"
-										+ "スレッド番号：[" + this.threadNo + "]"
-										+ ", スレッド型：[" + this.threadTypeName + "]"
-										+ ", エラー件数／実行件数：[" + this.errorCount + "／" + this.execCount + "]"
-									);
-
-		// ステータスを終了にする
-		this.status = ThreadStatus.End;
 	}
 
 	/**
@@ -241,6 +262,10 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 
 
 	/* -- getter・setter --------------------------------------------------- */
+
+	public IUserInfo getMainThreadUserInfo() {
+		return mainThreadUserInfo;
+	}
 
 	protected ParamClass getExecuteParam() {
 		return executeParam;
