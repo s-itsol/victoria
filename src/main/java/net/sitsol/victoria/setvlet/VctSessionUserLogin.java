@@ -3,13 +3,13 @@ package net.sitsol.victoria.setvlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import net.sitsol.victoria.configs.VctInitApParam;
-import net.sitsol.victoria.consts.VctHttpConst;
+import net.sitsol.victoria.configs.VctStaticApParam;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
 import net.sitsol.victoria.models.userinfo.IUserInfo;
 import net.sitsol.victoria.spring.VctBeanFactory;
 import net.sitsol.victoria.threadlocals.ThreadUserInfo;
+import net.sitsol.victoria.utils.statics.VctSessionAccessUtils;
 
 /**
  * HTTPセッション・ユーザーログインクラス
@@ -20,7 +20,7 @@ public class VctSessionUserLogin {
 
 	/* -- static ----------------------------------------------------------- */
 
-	public static final String SPRING_BEAN_NAME	= "UserProfiler";		// Springで管理されるこのクラスのビーン名
+	public static final String SPRING_BEAN_NAME	= "SessionUserLogin";		// Springで管理されるこのクラスのビーン名
 
 
 	/**
@@ -28,7 +28,7 @@ public class VctSessionUserLogin {
 	 * @return 本クラスのインスタンス
 	 */
 	public static VctSessionUserLogin getInstance() {
-		return (VctSessionUserLogin) VctBeanFactory.getInstance().getBean(VctInitApParam.SPRING_BEAN_NAME, VctSessionUserLogin.class);
+		return (VctSessionUserLogin) VctBeanFactory.getInstance().getBean(VctStaticApParam.SPRING_BEAN_NAME, VctSessionUserLogin.class);
 	}
 
 
@@ -56,7 +56,7 @@ public class VctSessionUserLogin {
 			}
 
 			// ログインするユーザー情報をセッションへ保持
-			request.getSession().setAttribute(VctHttpConst.ATTR_NAME_USER_INFO, userInfo);
+			VctSessionAccessUtils.setLoginUserInfo(request, userInfo);
 			// スレッド毎ユーザー情報リフレッシュ
 			ThreadUserInfo.reflashThreadUserInfo(userInfo);
 
@@ -139,20 +139,11 @@ public class VctSessionUserLogin {
 	 * @return ログインユーザー情報 ※未ログインの場合はnull
 	 */
 	public IUserInfo getUserInfo(HttpServletRequest request) {
-		return ( request != null ) ? this.getUserInfo(request.getSession()) : null;
-	}
-
-	/**
-	 * ログインユーザー情報の取得
-	 * @param session HTTPセッション
-	 * @return ログインユーザー情報 ※未ログインの場合はnull
-	 */
-	public IUserInfo getUserInfo(HttpSession session) {
 
 		IUserInfo userInfo = null;
 		{
-			if ( session != null ) {
-				userInfo = (IUserInfo) session.getAttribute(VctHttpConst.ATTR_NAME_USER_INFO);
+			if ( request != null && request.getSession() != null ) {
+				userInfo = VctSessionAccessUtils.getLoginUserInfo(request);
 			}
 		}
 
@@ -165,20 +156,11 @@ public class VctSessionUserLogin {
 	 * @return ログインユーザーID ※未ログインの場合はnull
 	 */
 	public String getUserId(HttpServletRequest request) {
-		return ( request != null ) ? this.getUserId(request.getSession()) : null;
-	}
-
-	/**
-	 * ログインユーザーIDの取得
-	 * @param session HTTPセッション
-	 * @return ログインユーザーID ※未ログインの場合はnull
-	 */
-	public String getUserId(HttpSession session) {
 
 		String userId = null;
 		{
 			// ログインユーザー情報の取得
-			IUserInfo userProfile = this.getUserInfo(session);
+			IUserInfo userProfile = this.getUserInfo(request);
 			if ( userProfile != null ) {
 				userId = userProfile.getUserId();
 			}

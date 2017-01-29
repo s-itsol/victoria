@@ -22,8 +22,7 @@ public class VctServletContextListener implements ServletContextListener {
 	/**
 	 * コンストラクタ
 	 */
-	public VctServletContextListener() {
-	}
+	public VctServletContextListener() {}
 
 	/**
 	 * コンテキスト初期イベント

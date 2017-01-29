@@ -16,25 +16,27 @@ public abstract class SimpleMultiThreadExecuter<ParamClass> extends BsMultiThrea
 	/**
 	 * コンストラクタ
 	 * @param maxThreadCount 最大同時実行スレッド数
+	 * @param threadName スレッド名 ※マルチスレッド用ログ出力に使うだけ
 	 */
-	public SimpleMultiThreadExecuter(int maxThreadCount) {
-		super(maxThreadCount);
+	public SimpleMultiThreadExecuter(int maxThreadCount, String threadName) {
+		super(maxThreadCount, threadName);
 	}
 
 	/**
 	 * スレッド実行クラスのインスタンス化
 	 * @param threadNo スレッド番号
+	 * @param threadName スレッド名
 	 */
 	@SuppressWarnings("resource")
 	@Override
-	protected BsThreadExecuter<ParamClass> createThreadExecuter(int threadNo) {
+	protected BsThreadExecuter<ParamClass> createThreadExecuter(int threadNo, String threadName) {
 
 		final SimpleMultiThreadExecuter<ParamClass> multiThreadExecuter = this;	// 本クラスのインスタンス
 
 		/**
 		 * スレッド実行支援クラス生成
 		 */
-		BsThreadExecuter<ParamClass> threadExecuter = new BsThreadExecuter<ParamClass>(threadNo) {
+		BsThreadExecuter<ParamClass> threadExecuter = new BsThreadExecuter<ParamClass>(threadNo, threadName) {
 
 			/**
 			 * スレッド実行処理コールバック

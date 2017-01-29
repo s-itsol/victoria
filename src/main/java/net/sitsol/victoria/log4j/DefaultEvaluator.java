@@ -15,11 +15,14 @@ import org.apache.log4j.spi.TriggeringEventEvaluator;
 public class DefaultEvaluator implements TriggeringEventEvaluator {
 
     /**
-     * イベント処理
+     * イベント処理判定
+     * @param event ロギングイベント
+     * @return 判定結果 ※true：ログ出力処理をさせる ／ false：ログ出力処理をさせない
      */
+	@Override
 	public boolean isTriggeringEvent(LoggingEvent event) {
-		// 規定のレベル未満なら処理をしない
-		//if ( VictoriaInitApParam.getInstance().getAlertMailMoreLogLevel().toInt() > event.getLevel().toInt() ) {
+
+		// デフォルトはFATALレベル未満なら処理をしない
 		if ( Level.ERROR.toInt() > event.getLevel().toInt() ) {
 			return false;
 		}

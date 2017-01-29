@@ -66,13 +66,14 @@ public class VctBeanFactory extends XmlBeanFactory {
 
 			// 初期処理成功ログ出力
 			VctLogger.getLogger().info("アプリケーション・コンテキスト初期処理終了。"
-										+ "処理時間：[" + stopWatch.getTime() + "(ms)]"
-										+ ", 設定ファイルパス：[" + appContextXmlFilePath + "]");
+											+ "処理時間：[" + stopWatch.getTime() + "(ms)]"
+											+ ", 設定ファイルパス：[" + appContextXmlFilePath + "]"
+										);
 		} catch (Exception ex) {
-			throw new VctRuntimeException(
-						"アプリケーション・コンテキストの初期処理でエラーが発生しました。"
-							+ "設定ファイルパス：[" + appContextXmlFilePath + "]"
-						, ex);
+			throw new VctRuntimeException(	"アプリケーション・コンテキストの初期処理でエラーが発生しました。"
+													+ "設定ファイルパス：[" + appContextXmlFilePath + "]"
+												, ex
+											);
 		}
 	}
 
@@ -88,8 +89,5 @@ public class VctBeanFactory extends XmlBeanFactory {
 	protected VctBeanFactory(Resource resource) {
 		super(resource);
 	}
-
-
-	/* -- orverride -------------------------------------------------------- */
 
 }

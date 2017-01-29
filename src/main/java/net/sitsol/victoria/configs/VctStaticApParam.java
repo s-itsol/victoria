@@ -19,20 +19,20 @@ import net.sitsol.victoria.spring.VctBeanFactory;
  *
  * @author shibano
  */
-public class VctInitApParam implements Serializable {
+public class VctStaticApParam implements Serializable {
 
 	/* -- static ----------------------------------------------------------- */
 
 	private static final long serialVersionUID = 759495219902390118L;
-	public static String SPRING_BEAN_NAME = "InitApParam";			// Springで管理されるこのクラスのビーン名
+	public static String SPRING_BEAN_NAME = "StaticApParam";			// Springで管理されるこのクラスのビーン名
 
 	/**
 	 * インスタンスの取得
 	 *  ※派生クラスでは、本メソッドをオーバーロードしてキャストするだけでインスタンスを取得することができるように想定
 	 * @return 本クラスのインスタンス
 	 */
-	public static VctInitApParam getInstance() {
-		return (VctInitApParam) VctBeanFactory.getInstance().getBean(VctInitApParam.SPRING_BEAN_NAME, VctInitApParam.class);
+	public static VctStaticApParam getInstance() {
+		return (VctStaticApParam) VctBeanFactory.getInstance().getBean(VctStaticApParam.SPRING_BEAN_NAME, VctStaticApParam.class);
 	}
 
 
@@ -58,7 +58,7 @@ public class VctInitApParam implements Serializable {
 	 * デフォルトコンストラクタ
 	 *  ※外部からはインスタンス化させない
 	 */
-	protected VctInitApParam() {}
+	protected VctStaticApParam() {}
 
 
 	/*-- setter・getter ------------------------------------------------------*/

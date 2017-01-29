@@ -70,7 +70,4 @@ public class VctLogger extends Logger {
 		super(loggerName);
 	}
 
-
-	/* -- orverride -------------------------------------------------------- */
-
 }

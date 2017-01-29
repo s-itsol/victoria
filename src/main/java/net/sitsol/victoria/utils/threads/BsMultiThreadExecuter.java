@@ -9,7 +9,7 @@ import net.sitsol.victoria.log4j.VctLogger;
  * マルチスレッドによる同期型分散実行を支援する抽象クラス
  *  AutoCloseableインタフェースを継承し、colseメソッドで各スレッドの終了を待つので、
  *  「
- * 		try( ExMultiThreadExecuter<String> executer = ExMultiThreadExecuter(3) ) {
+ * 		try( ExMultiThreadExecuter<String> executer = ExMultiThreadExecuter(3, "XXリクエスト") ) {
  * 			// 分散実行させる処理ループ
  * 			for (;;) {
  * 				// スレッド実行要求
@@ -29,6 +29,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements AutoCloseable
 	// ------------------------------------------------------------------------
 
 	private BsThreadExecuter<ParamClass>[] threadExecuters = null;		// スレッド実行支援クラス群
+	private String threadName = null;									// スレッド名
 	private int totalExecCount = 0;									// 処理実行件数 ※終了処理で集計されます
 	private int totalErrorCount = 0;									// エラー件数 ※終了処理で集計されます
 
@@ -40,13 +41,22 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements AutoCloseable
 	/**
 	 * コンストラクタ
 	 * @param maxThreadCount 最大同時実行スレッド数
+	 * @param threadName スレッド名 ※マルチスレッド用ログ出力に使うだけ
 	 */
 	@SuppressWarnings("unchecked")
-	public BsMultiThreadExecuter(int maxThreadCount) {
+	public BsMultiThreadExecuter(int maxThreadCount, String threadName) {
 
 		// 同期型マルチスレッド分散処理の開始ログ
-		VctLogger.getLogger().info("同期型分散処理を開始します。最大スレッド数：[" + maxThreadCount + "]");
+		{
+			StringBuilder message = new StringBuilder();
+			message.append("同期型分散処理を開始します");
+			message.append("最大スレッド数：[").append(maxThreadCount).append("]");
+			message.append(", スレッド名：[").append(threadName).append("]");
 
+			VctLogger.getLogger().info(message.toString());
+		}
+
+		this.threadName = threadName;
 		this.totalExecCount = 0;
 		this.totalErrorCount = 0;
 
@@ -55,7 +65,7 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements AutoCloseable
 		{
 			// スレッドを生成・開始して配列に格納
 			for ( int idx = 0; idx < maxThreadCount; idx++ ) {
-				executers[idx] = this.createThreadExecuter(idx + 1);
+				executers[idx] = this.createThreadExecuter(idx + 1, threadName);
 			}
 		}
 
@@ -129,7 +139,14 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements AutoCloseable
 		}
 
 		// 同期型マルチスレッド分散処理の終了ログ
-		VctLogger.getLogger().info("同期型分散処理を終了しました。エラー件数／実行件数：[" + this.getTotalErrorCount() + "／" + this.getTotalExecCount() + "]");
+		{
+			StringBuilder message = new StringBuilder();
+			message.append("同期型分散処理を終了しました。");
+			message.append("スレッド名：[").append(this.getThreadName()).append("]");
+			message.append(", エラー件数／実行件数：[").append(this.getTotalErrorCount()).append("／").append(this.getTotalExecCount()).append("]");
+
+			VctLogger.getLogger().info(message.toString());
+		}
 
 		// 全スレッド実行完了イベント通知
 		this.noticeAllThreadCompleted(this.getTotalExecCount(), this.getTotalErrorCount());
@@ -209,16 +226,21 @@ public abstract class BsMultiThreadExecuter<ParamClass> implements AutoCloseable
 	 * スレッド実行クラスの生成
 	 *  ※派生クラス側で継承して実装する
 	 *  ※BsThreadExecuterの派生クラスをインスタンス化して返すようにすること
-	 *  @param threadNo スレッド番号
-	 *  @return インスタンス化したスレッド実行クラス
+	 * @param threadNo スレッド番号 ※マルチスレッド用ログ出力に使うだけ
+	 * @param threadName スレッド名 ※マルチスレッド用ログ出力に使うだけ
+	 * @return インスタンス化したスレッド実行クラス
 	 */
-	protected abstract BsThreadExecuter<ParamClass> createThreadExecuter(int threadNo);
+	protected abstract BsThreadExecuter<ParamClass> createThreadExecuter(int threadNo, String threadName);
 
 
 	/* -- getter・setter --------------------------------------------------- */
 
 	protected BsThreadExecuter<ParamClass>[] getThreadExecuters() {
 		return threadExecuters;
+	}
+
+	public String getThreadName() {
+		return threadName;
 	}
 
 	public int getTotalErrorCount() {
