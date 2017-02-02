@@ -13,7 +13,7 @@ import net.sitsol.victoria.threadlocals.ThreadLog4jNdc;
 import net.sitsol.victoria.threadlocals.ThreadUserInfo;
 
 /**
- * スレッド実行を支援する抽象クラス
+ * スレッド実行支援-基底クラス
  *
  * @param <ParamClass> スレッド実行パラメータクラス型
  * @author shibano
@@ -65,7 +65,7 @@ public abstract class BsThreadExecuter<ParamClass> implements Closeable, Runnabl
 	 * @param threadName スレッド名 ※マルチスレッド用ログ出力に使うだけ
 	 */
 	public BsThreadExecuter(int threadNo, String threadName) {
-		
+
 		// フィールド値の初期化
 		this.threadNo = threadNo;
 		this.threadName = threadName;

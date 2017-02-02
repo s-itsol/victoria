@@ -6,7 +6,7 @@ package net.sitsol.victoria.utils.threads;
 import net.sitsol.victoria.log4j.VctLogger;
 
 /**
- * マルチスレッドによる同期型分散実行を支援する抽象クラス
+ * マルチスレッド同期型分散実行支援-基底クラス
  *  AutoCloseableインタフェースを継承し、colseメソッドで各スレッドの終了を待つので、
  *  「
  * 		try( ExMultiThreadExecuter<String> executer = ExMultiThreadExecuter(3, "XXリクエスト") ) {
