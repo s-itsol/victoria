@@ -3,9 +3,13 @@
  */
 package net.sitsol.victoria.log4j;
 
+import java.net.URL;
+
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+
+import net.sitsol.victoria.exceptions.VctRuntimeException;
 
 /**
  * victoria用ロガークラス
@@ -16,8 +20,9 @@ public class VctLogger extends Logger {
 
 	/* -- static ----------------------------------------------------------- */
 
+	/** デフォルト-設定ファイルパス */
+	public static final String DEFAULT_LOG_CONF_FILE_PATH = "log4j.xml";
 	private static VctLoggerFactory factory_ = new VctLoggerFactory();	// ログファクトリ
-	public static final String DEFAULT_LOG_CONF_PATH = "src/main/config/log4j.xml";
 
 	/**
 	 * デフォルトロガー取得
@@ -29,16 +34,29 @@ public class VctLogger extends Logger {
 
 	/**
 	 * log4j初期処理
-	 *  ※ログ設定ファイルパスはデフォルト(＝"src/main/config/log4j.xml")を使う
+	 *  ※ログ設定ファイルパスは、クラスパス上のデフォルト-ログ設定ファイルパスを使う
 	 */
 	public static void initialize() {
-		// デフォルトパスのXMLファイルから設定を読み込む
-		initialize(DEFAULT_LOG_CONF_PATH);
+
+		String confFileClassPath = DEFAULT_LOG_CONF_FILE_PATH;		// デフォルト-設定ファイルパス
+
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		URL url = loader.getResource(confFileClassPath);
+
+		// クラスパス上にファイルが見つからなかった場合
+		if ( url == null ) {
+			throw new VctRuntimeException("log4j設定ファイルが見つかりませんでした。クラスパス上にファイルがあるか確認してください。"
+												+ "読込ファイルパス：[" + confFileClassPath + "]"
+											);
+		}
+
+		// log4j初期処理
+		initialize(url.getPath());
 	}
 
 	/**
 	 * log4j初期処理
-	 * @param log4jXmlFilePath ログ設定ファイル(≒log4j.xml)のファイルパス
+	 * @param log4jXmlFilePath ログ設定ファイルのファイルパス
 	 */
 	public static void initialize(String log4jXmlFilePath) {
 

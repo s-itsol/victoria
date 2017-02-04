@@ -3,6 +3,8 @@
  */
 package net.sitsol.victoria.spring;
 
+import java.net.URL;
+
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -21,7 +23,8 @@ public class VctBeanFactory extends XmlBeanFactory {
 
 	/* -- static ----------------------------------------------------------- */
 
-	public static final String DEFAULT_CONTEXT_CONF_PATH = "src/main/config/app-context.xml";
+	/** デフォルト-設定ファイルパス */
+	public static final String DEFAULT_CONTEXT_CONF_PATH = "app-context.xml";
 	private static VctBeanFactory instance_ = null;
 
 	/**
@@ -41,16 +44,29 @@ public class VctBeanFactory extends XmlBeanFactory {
 
 	/**
 	 * アプリケーション・コンテキスト初期処理
-	 *  ※コンテキスト設定ファイルパスはデフォルト(＝"src/main/config/app-context.xml")を使う
+	 *  ※コンテキスト設定ファイルパスはデフォルトを使う
 	 */
 	public static void initialize() {
+
+		String confFileClassPath = DEFAULT_CONTEXT_CONF_PATH;		// デフォルト-設定ファイルパス
+
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		URL url = loader.getResource(confFileClassPath);
+
+		// クラスパス上にファイルが見つからなかった場合
+		if ( url == null ) {
+			throw new VctRuntimeException("アプリケーション・コンテキスト設定ファイルが見つかりませんでした。クラスパス上にファイルがあるか確認してください。"
+												+ "読込ファイルパス：[" + confFileClassPath + "]"
+											);
+		}
+
 		// デフォルトパスのXMLファイルから設定を読み込む
-		initialize(DEFAULT_CONTEXT_CONF_PATH);
+		initialize(url.getPath());
 	}
 
 	/**
 	 * アプリケーション・コンテキスト初期処理
-	 * @param appContextXmlFilePath コンテキスト設定ファイル(≒app-context.xml)のファイルパス
+	 * @param appContextXmlFilePath アプリケーション・コンテキスト設定ファイルのファイルパス
 	 */
 	public static void initialize(String appContextXmlFilePath) {
 
