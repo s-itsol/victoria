@@ -23,5 +23,8 @@
 	<classpathentry kind="lib" path="/victoria-libs/spring-context-4.3.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-core-4.3.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-webmvc-4.3.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/spring-aop-4.3.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/spring-web-4.3.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/spring-expression-4.3.6.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
