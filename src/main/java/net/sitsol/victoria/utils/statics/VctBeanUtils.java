@@ -8,9 +8,9 @@ import java.beans.PropertyDescriptor;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.StopWatch;
 
 import net.sitsol.victoria.log4j.VctLogger;
-import net.sitsol.victoria.utils.VctStopWatch;
 
 /**
  * Bean編集支援ユーティリティ
@@ -35,7 +35,8 @@ public class VctBeanUtils {
 		String beanName = StringUtils.EMPTY;
 
 		try {
-			VctStopWatch stopWatch = new VctStopWatch();
+			StopWatch stopWatch = new StopWatch();
+			stopWatch.start();
 
 			// Beanクラス名取得
 			beanName = targetBean.getClass().getSimpleName();

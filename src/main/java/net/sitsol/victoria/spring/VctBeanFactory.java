@@ -3,13 +3,13 @@
  */
 package net.sitsol.victoria.spring;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
-import net.sitsol.victoria.utils.VctStopWatch;
 
 /**
  * ビーンファクトリークラス
@@ -56,7 +56,8 @@ public class VctBeanFactory extends XmlBeanFactory {
 
 		try {
 
-			VctStopWatch stopWatch = new VctStopWatch();
+			StopWatch stopWatch = new StopWatch();
+			stopWatch.start();
 
 			// XMLファイルから設定を読み込む
 			Resource resource = new FileSystemResource(appContextXmlFilePath);

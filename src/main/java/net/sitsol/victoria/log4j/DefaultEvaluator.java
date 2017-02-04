@@ -23,7 +23,7 @@ public class DefaultEvaluator implements TriggeringEventEvaluator {
 	public boolean isTriggeringEvent(LoggingEvent event) {
 
 		// デフォルトはFATALレベル未満なら処理をしない
-		if ( Level.ERROR.toInt() > event.getLevel().toInt() ) {
+		if ( Level.FATAL.toInt() > event.getLevel().toInt() ) {
 			return false;
 		}
 

@@ -24,6 +24,9 @@ import org.apache.log4j.PatternLayout;
  */
 public class DefaultPatternLayout extends PatternLayout {
 
+	/** デフォルト推奨-出力書式 */
+	public static String DEFAULT_PATTERN = "[%d],[%p],[%x],[%t],[%l], %m%n";
+
 	/**
 	 * デフォルトコンストラクタ
 	 */
@@ -31,7 +34,17 @@ public class DefaultPatternLayout extends PatternLayout {
 		super();
 
 		// 基本的なパラメータをここでまとめて実装
-		this.setConversionPattern("[%d],[%p],[%x],[%t],[%l], %m%n");				// 出力書式 ※victoriaデフォルト推奨の出力書式
+		this.setConversionPattern(this.createPattern());				// 出力書式
+	}
+
+	/**
+	 * 出力書式生成
+	 *  ※出力書式を差し替える場合は、派生クラス側でオーバーライド実装する事を想定している。
+	 * @return 出力書式文字列
+	 */
+	protected String createPattern() {
+		// デフォルト推奨-出力書式
+		return DEFAULT_PATTERN;
 	}
 
 }

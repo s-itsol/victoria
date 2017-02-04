@@ -3,10 +3,9 @@
  */
 package net.sitsol.victoria.log4j;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-
-import net.sitsol.victoria.utils.VctStopWatch;
 
 /**
  * victoria用ロガークラス
@@ -43,7 +42,8 @@ public class VctLogger extends Logger {
 	 */
 	public static void initialize(String log4jXmlFilePath) {
 
-		VctStopWatch stopWatch = new VctStopWatch();
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
 
 		// XMLファイルから設定を読み込む
 		DOMConfigurator.configure(log4jXmlFilePath);
