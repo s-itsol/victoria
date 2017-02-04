@@ -6,7 +6,8 @@ package net.sitsol.victoria.spring;
 import java.net.URL;
 
 import org.apache.commons.lang.time.StopWatch;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -19,13 +20,13 @@ import net.sitsol.victoria.log4j.VctLogger;
  *
  * @author shibano
  */
-public class VctBeanFactory extends XmlBeanFactory {
+public class VctBeanFactory extends DefaultListableBeanFactory {
 
 	/* -- static ----------------------------------------------------------- */
 
 	/** デフォルト-設定ファイルパス */
 	public static final String DEFAULT_CONTEXT_CONF_PATH = "app-context.xml";
-	private static VctBeanFactory instance_ = null;
+	private static VctBeanFactory instance_ = new VctBeanFactory();
 
 	/**
 	 * インスタンス取得
@@ -75,9 +76,12 @@ public class VctBeanFactory extends XmlBeanFactory {
 			StopWatch stopWatch = new StopWatch();
 			stopWatch.start();
 
+			// XML読込クラス生成
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(instance_);
+
 			// XMLファイルから設定を読み込む
 			Resource resource = new FileSystemResource(appContextXmlFilePath);
-			instance_ = new VctBeanFactory(resource);
+			reader.loadBeanDefinitions(resource);
 
 			stopWatch.stop();
 
@@ -101,10 +105,9 @@ public class VctBeanFactory extends XmlBeanFactory {
 
 	/**
 	 * コンストラクタ
-	 * @param resource Springリソース
 	 */
-	protected VctBeanFactory(Resource resource) {
-		super(resource);
+	protected VctBeanFactory() {
+		super();
 	}
 
 }

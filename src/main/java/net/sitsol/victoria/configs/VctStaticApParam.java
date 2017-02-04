@@ -32,7 +32,7 @@ public class VctStaticApParam implements Serializable {
 	 * @return 本クラスのインスタンス
 	 */
 	public static VctStaticApParam getInstance() {
-		return (VctStaticApParam) VctBeanFactory.getInstance().getBean(VctStaticApParam.SPRING_BEAN_NAME, VctStaticApParam.class);
+		return (VctStaticApParam) VctBeanFactory.getInstance().getBean(SPRING_BEAN_NAME, VctStaticApParam.class);
 	}
 
 
