@@ -3,11 +3,11 @@ package net.sitsol.victoria.setvlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import net.sitsol.victoria.beanfactory.spring.VctBeanFactory;
 import net.sitsol.victoria.configs.VctStaticApParam;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
 import net.sitsol.victoria.models.userinfo.IUserInfo;
-import net.sitsol.victoria.spring.VctBeanFactory;
 import net.sitsol.victoria.threadlocals.ThreadUserInfo;
 import net.sitsol.victoria.utils.statics.VctSessionAccessUtils;
 

@@ -6,8 +6,8 @@ package net.sitsol.victoria.setvlet;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import net.sitsol.victoria.beanfactory.spring.VctBeanFactory;
 import net.sitsol.victoria.log4j.VctLogger;
-import net.sitsol.victoria.spring.VctBeanFactory;
 
 /**
  * サーブレット・コンテキスト・リスナー

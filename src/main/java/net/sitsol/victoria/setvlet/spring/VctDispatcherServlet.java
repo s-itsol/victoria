@@ -1,7 +1,7 @@
 /**
  *
  */
-package net.sitsol.victoria.setvlet;
+package net.sitsol.victoria.setvlet.spring;
 
 import org.springframework.web.servlet.DispatcherServlet;
 

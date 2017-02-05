@@ -8,7 +8,7 @@ import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 
-import net.sitsol.victoria.spring.VctBeanFactory;
+import net.sitsol.victoria.beanfactory.spring.VctBeanFactory;
 
 /**
  * 静的アプリケーション・パラメータクラス

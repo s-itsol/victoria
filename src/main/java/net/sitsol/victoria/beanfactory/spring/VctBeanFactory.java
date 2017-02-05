@@ -1,7 +1,7 @@
 /**
  *
  */
-package net.sitsol.victoria.spring;
+package net.sitsol.victoria.beanfactory.spring;
 
 import java.net.URL;
 
