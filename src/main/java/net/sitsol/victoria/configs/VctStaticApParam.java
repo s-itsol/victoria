@@ -42,6 +42,8 @@ public class VctStaticApParam implements Serializable {
 
 	// ※パラメータ値として保持したいものを、ここでフィールドとして定義する
 	private String dispEnvName						= StringUtils.EMPTY;	// 表示用環境名称
+	private String appEncoding						= "UTF-8";				// アプリケーション標準エンコーディング
+	private String clientEncoding					= "MS932";				// クライアントPCエンコーディング
 	private Level alertMailMoreLogLevel			= Level.FATAL;			// アラート・メールを送るログレベル ※設定レベル以上ならアラートを発する
 	private boolean sqlTraceLogOutputFlg			= false;				// SQLトレースログ出力フラグ ※true：SQLトレースログを出力する
 	private boolean sqlTraceLogLiteralFlg			= true;					// SQLトレースログリテラル化フラグ ※true：SQLトレースログ出力時にリテラルSQL化する
@@ -69,6 +71,22 @@ public class VctStaticApParam implements Serializable {
 
 	public void setDispEnvName(String dispEnvName) {
 		this.dispEnvName = dispEnvName;
+	}
+
+	public String getAppEncoding() {
+		return appEncoding;
+	}
+
+	public void setAppEncoding(String appEncoding) {
+		this.appEncoding = appEncoding;
+	}
+
+	public String getClientEncoding() {
+		return clientEncoding;
+	}
+
+	public void setClientEncoding(String clientEncoding) {
+		this.clientEncoding = clientEncoding;
 	}
 
 	public Level getAlertMailMoreLogLevel() {
