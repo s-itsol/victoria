@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar"/>
+	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar" sourcepath="/TOMCAT_HOME/apache-tomcat-7.0.75-src.zip"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jasper.jar"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jsp-api.jar"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/el-api.jar"/>
@@ -20,12 +20,13 @@
 	<classpathentry kind="lib" path="/victoria-libs/spring-beans-4.3.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-context-4.3.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-core-4.3.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/spring-webmvc-4.3.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/spring-webmvc-4.3.6.RELEASE.jar" sourcepath="/victoria-libs/src/spring-webmvc-4.3.6.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-aop-4.3.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/spring-web-4.3.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/spring-expression-4.3.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/spring-web-4.3.6.RELEASE.jar" sourcepath="/victoria-libs/src/spring-web-4.3.6.RELEASE-sources.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/spring-expression-4.3.6.RELEASE.jar" sourcepath="/victoria-libs/src/spring-expression-4.3.6.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-context-support-4.3.6.RELEASE.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/velocity-1.7-dep.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/velocity-1.7.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/velocity-1.7.jar" sourcepath="/victoria-libs/src/velocity-1.7-sources.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/velocity-tools-2.0.jar" sourcepath="/victoria-libs/src/velocity-tools-2.0-src.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/commons-digester-2.1.jar" sourcepath="/victoria-libs/src/commons-digester-2.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

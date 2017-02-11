@@ -5,7 +5,6 @@ package net.sitsol.victoria.beanfactory.spring;
 
 import java.net.URL;
 
-import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -73,8 +72,7 @@ public class VctBeanFactory extends DefaultListableBeanFactory {
 
 		try {
 
-			StopWatch stopWatch = new StopWatch();
-			stopWatch.start();
+			long startMillus = System.currentTimeMillis();
 
 			// XML読込クラス生成
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(instance_);
@@ -83,11 +81,11 @@ public class VctBeanFactory extends DefaultListableBeanFactory {
 			Resource resource = new FileSystemResource(appContextXmlFilePath);
 			reader.loadBeanDefinitions(resource);
 
-			stopWatch.stop();
+			long execMillis = System.currentTimeMillis() - startMillus;
 
 			// 初期処理成功ログ出力
 			VctLogger.getLogger().info("アプリケーション・コンテキスト初期処理終了。"
-											+ "処理時間：[" + stopWatch.getTime() + "(ms)]"
+											+ "処理時間：[" + execMillis + "](ms)"
 											+ ", 設定ファイルパス：[" + appContextXmlFilePath + "]"
 										);
 		} catch (Exception ex) {

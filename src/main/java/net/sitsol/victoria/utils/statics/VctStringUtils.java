@@ -12,8 +12,8 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * 文字列ユーティリティ
- * @author shibano
  *
+ * @author shibano
  */
 public class VctStringUtils {
 

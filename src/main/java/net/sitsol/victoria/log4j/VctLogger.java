@@ -5,7 +5,6 @@ package net.sitsol.victoria.log4j;
 
 import java.net.URL;
 
-import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -60,17 +59,16 @@ public class VctLogger extends Logger {
 	 */
 	public static void initialize(String log4jXmlFilePath) {
 
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
+		long startMillus = System.currentTimeMillis();
 
 		// XMLファイルから設定を読み込む
 		DOMConfigurator.configure(log4jXmlFilePath);
 
-		stopWatch.stop();
+		long execMillis = System.currentTimeMillis() - startMillus;
 
 		// 初期処理成功ログ出力
 		VctLogger.getLogger().info("log4j初期処理終了。"
-										+ "処理時間：[" + stopWatch.getTime() + "(ms)]"
+										+ "処理時間：[" + execMillis + "](ms)"
 										+ ", 設定ファイルパス：[" + log4jXmlFilePath + "]"
 									);
 	}
