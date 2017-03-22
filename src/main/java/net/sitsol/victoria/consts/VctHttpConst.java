@@ -11,7 +11,7 @@ package net.sitsol.victoria.consts;
 public class VctHttpConst {
 
 	/** コンストラクタ */
-	private VctHttpConst() {}
+	protected VctHttpConst() {}
 
 	// 共通パラメータ名 ※requestの属性名、GET・POSTパラメータ名
 
