@@ -24,6 +24,8 @@ import net.sitsol.victoria.log4j.VctLogger;
 
 /**
  * HTTPリクエスト支援クラス
+ *  ※HTTP-APIの接続先サービスごとに派生クラスを作成し、
+ *    リクエストヘッダ等をオーバーライド実装で差し替えることを想定している。
  *
  * @author shibano
  */
@@ -89,7 +91,7 @@ public class VctHttpRequester {
 	protected String httpRequest(String requestUrl, boolean isPost, List<Parameter> parameterList) {
 
 		HttpURLConnection con = null;
-		StringBuilder responsStr = new StringBuilder();
+		StringBuilder responseStr = new StringBuilder();
 		BufferedReader reader = null;
 
 		try {
@@ -166,7 +168,7 @@ public class VctHttpRequester {
 			// 応答結果を文字列で取得
 			String line = null;
 			while ( (line = reader.readLine()) != null ) {
-				responsStr.append(line);
+				responseStr.append(line);
 			}
 
 		} catch ( Exception ex) {
@@ -189,7 +191,7 @@ public class VctHttpRequester {
 			}
 		}
 
-		return responsStr.toString();
+		return responseStr.toString();
 	}
 
 	/**
@@ -222,11 +224,6 @@ public class VctHttpRequester {
 		}
 
 		return parameterQueryString.toString();
-	}
-
-	protected HttpURLConnection openConnection(URL url) throws IOException {
-		// ※デフォルトはProxy無しでHTTPコネクション生成
-		return (HttpURLConnection) url.openConnection();
 	}
 
 	/**
