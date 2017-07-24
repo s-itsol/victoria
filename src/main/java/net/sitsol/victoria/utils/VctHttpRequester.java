@@ -4,7 +4,6 @@
 package net.sitsol.victoria.utils;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -14,13 +13,14 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import net.sitsol.victoria.configs.VctStaticApParam;
+import net.sitsol.victoria.exceptions.VctHttpRuntimeException;
+import net.sitsol.victoria.exceptions.VctRuntimeException;
+import net.sitsol.victoria.log4j.VctLogger;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Parameter;
-
-import net.sitsol.victoria.configs.VctStaticApParam;
-import net.sitsol.victoria.exceptions.VctRuntimeException;
-import net.sitsol.victoria.log4j.VctLogger;
 
 /**
  * HTTPリクエスト支援クラス
@@ -159,7 +159,7 @@ public class VctHttpRequester {
 
 			// HTTPエラー応答あり ※HTTP_OK以外は全てエラー扱い
 			if ( sts != HttpURLConnection.HTTP_OK ) {
-				throw new VctRuntimeException("HTTPエラー応答あり。HTTP応答ステータス：[" + sts + "]");
+				throw new VctHttpRuntimeException("HTTPエラー応答あり。HTTP応答ステータス：[" + sts + "]", sts);
 			}
 
 			// HTTP応答結果取得
@@ -170,6 +170,10 @@ public class VctHttpRequester {
 			while ( (line = reader.readLine()) != null ) {
 				responseStr.append(line);
 			}
+
+		// HTTPエラー応答はそのままスロー
+		} catch ( VctHttpRuntimeException ex ) {
+			throw ex;
 
 		} catch ( Exception ex) {
 			throw new VctRuntimeException("HTTPリクエストでエラーが発生しました。"
