@@ -45,6 +45,7 @@ public class VctStaticApParam implements Serializable {
 	private String appEncoding						= "UTF-8";				// アプリケーション標準エンコーディング
 	private String clientEncoding					= "MS932";				// クライアントPCエンコーディング
 	private Level alertMailMoreLogLevel			= Level.FATAL;			// アラート・メールを送るログレベル ※設定レベル以上ならアラートを発する
+	private boolean httpRequestUrlLogOutputFlg	= true;					// HTTPリクエストURLログ出力フラグ ※true：HTTPリクエストURLログを出力する
 	private boolean sqlTraceLogOutputFlg			= false;				// SQLトレースログ出力フラグ ※true：SQLトレースログを出力する
 	private boolean sqlTraceLogLiteralFlg			= true;					// SQLトレースログリテラル化フラグ ※true：SQLトレースログ出力時にリテラルSQL化する
 	private int warningSqlExecuteMillis			= 1000;					// 警告を出す超過SQL実行時間(ミリ秒)
@@ -95,6 +96,14 @@ public class VctStaticApParam implements Serializable {
 
 	public void setAlertMailMoreLogLevel(Level alertMailMoreLogLevel) {
 		this.alertMailMoreLogLevel = alertMailMoreLogLevel;
+	}
+
+	public boolean isHttpRequestUrlLogOutputFlg() {
+		return httpRequestUrlLogOutputFlg;
+	}
+
+	public void setHttpRequestUrlLogOutputFlg(boolean httpRequestUrlLogOutputFlg) {
+		this.httpRequestUrlLogOutputFlg = httpRequestUrlLogOutputFlg;
 	}
 
 	public boolean isSqlTraceLogOutputFlg() {
