@@ -25,7 +25,7 @@ import org.apache.log4j.PatternLayout;
 public class DefaultPatternLayout extends PatternLayout {
 
 	/** デフォルト推奨-出力書式 */
-	public static String DEFAULT_PATTERN = "[%d],[%p],[%x],[%t],[%l], %m%n";
+	public static String DEFAULT_PATTERN = "[%d],[%p],[%x],[%t],%m,[%l]%n";
 
 	/**
 	 * デフォルトコンストラクタ
