@@ -27,6 +27,7 @@ public class VctServletContextListener implements ServletContextListener {
 	/**
 	 * コンテキスト初期イベント
 	 */
+	@Override
 	public void contextInitialized(ServletContextEvent event) {
 
 		// ログ初期設定
@@ -40,6 +41,7 @@ public class VctServletContextListener implements ServletContextListener {
 	/**
 	 * コンテキスト解放イベント
 	 */
+	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		VctLogger.getLogger().info("アプリケーション終了処理が正常終了しました。");
 	}
