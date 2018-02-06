@@ -17,7 +17,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
  * 
  * @author shibano
  */
-public class VctMessageSauce {
+public class VctMessageSource {
 
 	/* -- static ----------------------------------------------------------- */
 
@@ -104,7 +104,7 @@ public class VctMessageSauce {
 	/**
 	 * コンストラクタ
 	 */
-	protected VctMessageSauce() {
+	protected VctMessageSource() {
 		super();
 	}
 

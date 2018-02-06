@@ -8,7 +8,7 @@ import javax.servlet.ServletContextListener;
 
 import net.sitsol.victoria.beanfactory.spring.VctBeanFactory;
 import net.sitsol.victoria.log4j.VctLogger;
-import net.sitsol.victoria.messages.VctMessageSauce;
+import net.sitsol.victoria.messages.VctMessageSource;
 
 /**
  * サーブレット・コンテキスト・リスナー
@@ -36,7 +36,7 @@ public class VctServletContextListener implements ServletContextListener {
 		// アプリケーション・コンテキスト(＝APPパラメータ含む)初期設定
 		VctBeanFactory.initialize();
 		// メッセージ初期設定
-		VctMessageSauce.initialize();
+		VctMessageSource.initialize();
 
 		VctLogger.getLogger().info("アプリケーション起動処理が正常終了しました。");
 	}
