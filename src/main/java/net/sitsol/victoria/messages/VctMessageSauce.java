@@ -13,12 +13,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
- * メッセージクラス
- *  メッセージプロパティファイルを読み込み、メッセージ取得のアクセッサとなる。
+ * メッセージソースクラス
  * 
  * @author shibano
  */
-public class VctMessage {
+public class VctMessageSauce {
 
 	/* -- static ----------------------------------------------------------- */
 
@@ -59,13 +58,13 @@ public class VctMessage {
 			long execMillis = System.currentTimeMillis() - startMillus;
 
 			// 初期処理成功ログ出力
-			VctLogger.getLogger().info("メッセージ初期処理終了。"
+			VctLogger.getLogger().info("メッセージソース初期処理終了。"
 											+ "処理時間：[" + execMillis + "](ms)"
 											+ ", メッセージプロパティファイルクラスパス：[" + messageFileClassPath + "]"
 											+ ", エンコーディング：[" + encoding + "]"
 										);
 		} catch (Exception ex) {
-			throw new VctRuntimeException(	"メッセージ初期処理でエラーが発生しました。"
+			throw new VctRuntimeException(	"メッセージソース初期処理でエラーが発生しました。"
 													+ "メッセージプロパティファイルクラスパス：[" + messageFileClassPath + "]"
 													+ ", エンコーディング：[" + encoding + "]"
 												, ex
@@ -105,7 +104,7 @@ public class VctMessage {
 	/**
 	 * コンストラクタ
 	 */
-	protected VctMessage() {
+	protected VctMessageSauce() {
 		super();
 	}
 
