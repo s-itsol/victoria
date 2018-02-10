@@ -10,6 +10,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 
+import net.sitsol.victoria.log4j.VctLogger;
+
 /**
  * 文字列ユーティリティ
  *
@@ -21,6 +23,121 @@ public class VctStringUtils {
 	 * コンストラクタ ※外部からインスタンス化させない
 	 */
 	protected VctStringUtils() {}
+
+	/**
+	 * 囲い有りCSV文字列(＝「="xxx"」形式)の生成
+	 * @param stringObjs 元となる文字列の可変長配列
+	 * @return 囲い有りCSV形式(＝「="xxx"」形式)の文字列
+	 */
+	public static String createBoxedCsvString(Object... stringObjs) {
+		// 囲いありCSV文字列生成
+		return createCsvString(true, stringObjs);
+	}
+
+	/**
+	 * 囲いなしCSV文字列の生成
+	 * @param stringObjs 元となる文字列の可変長配列
+	 * @return 囲いなしCSV形式の文字列
+	 */
+	public static String createCsvString(Object... stringObjs) {
+		// 囲いなしCSV文字列生成
+		return createCsvString(false, stringObjs);
+	}
+
+	/**
+	 * CSV文字列の生成
+	 * @param isBox 囲い有りフラグ
+	 * @param stringObjs 元となる文字列の可変長配列
+	 * @return CSV形式の文字列
+	 */
+	private static String createCsvString(boolean isBox, Object... stringObjs) {
+		// カンマ区切り文字列生成
+		return createSplitString(",", isBox, stringObjs);
+    }
+
+	/**
+	 * 囲いなし半角スペース区切り文字列の生成
+	 * @param stringObjs 元となる文字列の可変長配列
+	 * @return 半角スペース区切り文字列
+	 */
+	public static String createSpaceSplitString(Object... stringObjs) {
+		// 半角スペース区切り、囲いなし文字列生成
+		return createSplitString(" ", false, stringObjs);
+	}
+
+	/**
+	 * 囲いなしTSV文字列の生成
+	 * @param stringObjs 元となる文字列の可変長配列
+	 * @return 囲いなしTSV形式の文字列
+	 */
+	public static String createTsvString(Object... stringObjs) {
+		// タブ区切り、囲いなし文字列生成
+		return createSplitString("\t", false, stringObjs);
+	}
+
+	/**
+	 * 区切り文字列の生成
+	 * @param splitStr 区切り文字列 ※カンマやタブ等
+	 * @param isBox 囲い有りフラグ
+	 * @param stringObjs 元となる文字列の可変長配列
+	 * @return 区切り形式の文字列
+	 */
+	private static String createSplitString(String splitStr, boolean isBox, Object... stringObjs) {
+
+		if (stringObjs == null) {
+			return null;
+		}
+
+		StringBuilder strBuff = new StringBuilder();
+		int columnNo = 1;
+
+		for (Object stringObj : stringObjs) {
+			try {
+				// １文字でも生成済み(＝最初の列でない)場合
+				if ( strBuff.length() > 0 ) {
+					// 区切り文字
+					strBuff.append(splitStr);
+				}
+
+				if ( isBox ) {
+					// 改行あり文字列でない場合 ※改行あり文字列に「=」をつけると、excelで１セルとして表示してくれない
+					if ( !(stringObj instanceof String) || StringUtils.indexOf((String)stringObj, "\n") < 0) {
+						strBuff.append("=");	// 囲い記号(=)
+					}
+
+					strBuff.append("\"");		// 囲い記号
+				}
+
+				// nullの場合は空文字に変換
+				if ( stringObj == null ) {
+					stringObj = StringUtils.EMPTY;
+				}
+
+				// 列文字列の追加 ※null参照対策、あえてToStringしない
+				strBuff.append(stringObj);
+
+				if ( isBox ) {
+					strBuff.append("\"");		// 囲い記号
+				}
+			}
+			catch (Exception ex) {
+				// どの列が失敗したかを特定できるようなエラーログを出力
+				VctLogger.getLogger().error("区切り文字列の生成でエラーが発生しました。"
+											+ "列連番：[" + columnNo + "]列目"
+										, ex);
+
+				// 変換エラーを明示する文字列として追加
+				//  ※予期せぬエラーでも原因特定がしやすいよう、業務アプリ向けの配慮
+				strBuff.append("Error!!");
+			}
+			finally {
+				// 列連番カウントアップ
+				columnNo++;
+			}
+		}
+
+		return strBuff.toString();
+	}
 
 	/**
 	 * 渡された文字列のCSV用ダブルクオーテーション囲い(「="XXX"」)を除去します。
