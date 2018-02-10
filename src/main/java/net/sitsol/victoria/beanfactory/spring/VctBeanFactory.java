@@ -32,13 +32,6 @@ public class VctBeanFactory extends DefaultListableBeanFactory {
 	 * @return ビーンファクトリーのインスタンス
 	 */
 	public static VctBeanFactory getInstance() {
-
-		// 生成されていない場合
-		if ( instance_ == null ) {
-			// デフォルト設定ファイルパスを使って初期処理
-			initialize();
-		}
-
 		return instance_;
 	}
 
