@@ -42,19 +42,14 @@ public class VctHandlerInterceptor extends HandlerInterceptorAdapter {
 			return true;
 		}
 		
-		if ( VctLogger.getLogger().isDebugEnabled() ) {
-			VctLogger.getLogger().debug(" -> コントローラ処理前イベント通知 - ハンドラクラス名：[" + handler.getClass().getSimpleName() + "]");
-		}
-		
 		// ハンドラメソッドだった場合
 		if ( handler instanceof HandlerMethod ) {
 			// コントローラメソッド処理前イベントを実行
 			return this.methodPreHandle( request, response, (HandlerMethod) handler );
 		}
 		
-		if ( VctLogger.getLogger().isDebugEnabled() ) {
-			VctLogger.getLogger().debug("★コントローラ処理前イベント通知にて、想定外のハンドラ・インスタンス通知あり - ハンドラクラス型：[" + handler.getClass().getSimpleName() + "]");
-		}
+		// ※実装していない想定外なクラス型なので、警告ログを出力しておく
+		VctLogger.getLogger().warn("★コントローラ処理前イベント通知にて、想定外のハンドラ・インスタンス通知あり - ハンドラクラス型：[" + handler.getClass().getSimpleName() + "]");
 		
 		return true;
 	}
@@ -114,15 +109,7 @@ public class VctHandlerInterceptor extends HandlerInterceptorAdapter {
 	 */
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-		
-		// 静的コンテンツだった場合は何もしない
-		if ( handler instanceof ResourceHttpRequestHandler ) {
-			return;
-		}
-		
-		if ( VctLogger.getLogger().isDebugEnabled() ) {
-			VctLogger.getLogger().debug(" -> コントローラ処理後イベント通知 - ハンドラクラス名：[" + handler.getClass().getSimpleName() + "], モデル＆ビュー情報(ビュー名)：[" + ( modelAndView == null ? null : modelAndView.getViewName() ) + "]");
-		}
+		// ※現状は特に処理なし
 	}
 
 	/**
@@ -132,15 +119,7 @@ public class VctHandlerInterceptor extends HandlerInterceptorAdapter {
 	 */
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-		
-		// 静的コンテンツだった場合は何もしない
-		if ( handler instanceof ResourceHttpRequestHandler ) {
-			return;
-		}
-		
-		if ( VctLogger.getLogger().isDebugEnabled() ) {
-			VctLogger.getLogger().debug(" -> リクエスト完了イベント通知 - ハンドラクラス名：[" + handler.getClass().getSimpleName() + "], 例外クラス名：[" + ( ex == null ? null : ex.getClass().getSimpleName() ) + "]");
-		}
+		// ※現状は特に処理なし
 	}
 
 }
