@@ -3,6 +3,8 @@
  */
 package net.sitsol.victoria.controllers;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.web.servlet.ModelAndView;
 
 import net.sitsol.victoria.consts.VctHttpConst;
@@ -14,6 +16,21 @@ import net.sitsol.victoria.log4j.VctLogger;
  * @author shibano
  */
 public abstract class VctController {
+
+	/**
+	 * セッション内フォーム破棄
+	 * @param request HTTPサーブレットリクエスト
+	 * @param removeFormName フォーム名
+	 */
+	protected void removeSessionFrom(HttpServletRequest request, String removeFormName) {
+		
+		if ( request == null || request.getSession() == null ) {
+			return;
+		}
+		
+		// セッションからフォームを破棄
+		request.getSession().removeAttribute(removeFormName);
+	}
 
 	/**
 	 * フォワード-AP内URL
