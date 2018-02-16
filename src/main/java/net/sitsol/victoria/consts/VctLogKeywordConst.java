@@ -15,5 +15,6 @@ public class VctLogKeywordConst {
 
 	// ログ埋込みキーワード
 	public static final String REQURL				= "<<<requrl>>>";		// HTTPリクエストURL
+	public static final String WARNTIME				= "<<<warntime>>>";		// 処理時間超過警告
 
 }
