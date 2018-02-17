@@ -32,6 +32,23 @@ public class VctReflectionUtils {
 	protected VctReflectionUtils() { }
 
 	/**
+	 * 簡易クラスメソッド名取得
+	 * @param method メソッド
+	 * @return クラスメソッド名の文字列 ※「簡易クラス名」#「メソッド名」形式
+	 */
+	public static String getSimpleClassMethodInfo(Method method) {
+		
+		if ( method == null ) {
+			return null;
+		}
+		
+		// 簡易クラス名取得
+		String className =  method.getDeclaringClass() != null ? method.getDeclaringClass().getSimpleName() : null;
+		
+		return className + "#" + method.getName();
+	}
+
+	/**
 	 * フィールド名から該当するsetter・getterメソッドを取得する
 	 * @param beanClass ビーンクラス型
 	 * @param prefixType setter／getterを表す種別

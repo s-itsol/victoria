@@ -14,6 +14,12 @@ import net.sitsol.victoria.log4j.VctLogger;
  */
 public class VctServerUtils {
 
+	/** 実行マシンのホスト名 */
+	public static final String HOST_NAME;
+	static {
+		HOST_NAME = VctServerUtils.getHostName();
+	}
+
 	/**
 	 * コンストラクタ ※外部からインスタンス化させない
 	 */
@@ -25,7 +31,7 @@ public class VctServerUtils {
 	 *    考えなしに何万回もループ実行させないよう要注意。
 	 * @return ホスト名 ※予期せぬ例外が発生時は、文字列 "UnknownHost" を返します。
 	 */
-	public static String getHostName() {
+	protected static String getHostName() {
 
 		String retHostName = null;
 		try {

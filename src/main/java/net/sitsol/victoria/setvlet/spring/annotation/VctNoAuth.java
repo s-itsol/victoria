@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 
 /**
  * 認証不要
+ *  ログイン認証を必要としないコントローラのメソッドに付けることを想定。
  *
  * @author shibano
  */

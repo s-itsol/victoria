@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 
 /**
  * HTTPリクエストURLログ出力不要
+ *  HTTPリクエストURLログの出力を必要としないコントローラのメソッドに付けることを想定。
+ *  ハートビート受信など、メンテナンス用リクエストが主な用途。
  *
  * @author shibano
  */
