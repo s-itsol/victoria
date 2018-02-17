@@ -7,8 +7,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.servlet.ModelAndView;
 
+import net.sitsol.victoria.annotation.servlet.VctInputForward;
+import net.sitsol.victoria.annotation.servlet.VctSuccessForward;
 import net.sitsol.victoria.consts.VctHttpConst;
+import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
 /**
  * victoria共通-コントローラ 基底クラス
@@ -30,6 +34,78 @@ public abstract class VctController {
 		
 		// セッションからフォームを破棄
 		request.getSession().removeAttribute(removeFormName);
+	}
+
+	/**
+	 * 入力ページフォワード
+	 * @return モデル＆ビュー情報
+	 */
+	protected ModelAndView inputForward() {
+		// ※モデル＆ビュー情報は新規インスタンス生成
+		return this.inputForward(new ModelAndView());
+	}
+
+	/**
+	 * 入力ページフォワード
+	 * @param modelAndView		IN/OUT：モデル＆ビュー情報
+	 * @return モデル＆ビュー情報
+	 */
+	protected ModelAndView inputForward(ModelAndView modelAndView) {
+		
+		// 入力フォワード先URLアノテーション取得
+		VctInputForward targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctInputForward.class);
+		
+		// フォワード先URL取得
+		String forwardUrl = targetAnno != null ? targetAnno.url() : null;
+		
+		// アノテーション指定フォワード実行
+		return this.doAnnotationForward(VctSuccessForward.class, forwardUrl, modelAndView);
+	}
+
+	/**
+	 * 正常終了フォワード
+	 * @return モデル＆ビュー情報
+	 */
+	protected ModelAndView succsessForward() {
+		// ※モデル＆ビュー情報は新規インスタンス生成
+		return this.succsessForward(new ModelAndView());
+	}
+
+	/**
+	 * 正常終了フォワード
+	 * @param modelAndView		IN/OUT：モデル＆ビュー情報
+	 * @return モデル＆ビュー情報
+	 */
+	protected ModelAndView succsessForward(ModelAndView modelAndView) {
+		
+		// 正常終了フォワード先URLアノテーション取得
+		VctSuccessForward targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctSuccessForward.class);
+		
+		// フォワード先URL取得
+		String forwardUrl = targetAnno != null ? targetAnno.url() : null;
+		
+		// アノテーション指定フォワード実行
+		return this.doAnnotationForward(VctSuccessForward.class, forwardUrl, modelAndView);
+	}
+
+	/**
+	 * アノテーション指定フォワード実行
+	 * @param targetAnnotaion 対象アノテーション
+	 * @param forwardUrl フォワード先URL
+	 * @param modelAndView		IN/OUT：モデル＆ビュー情報
+	 * @return モデル＆ビュー情報
+	 */
+	private <AnnotationClass> ModelAndView doAnnotationForward(Class<AnnotationClass> targetAnnotaion, String forwardUrl, ModelAndView modelAndView) {
+		
+		if ( forwardUrl == null ) {
+			// フォワード出来ないので明示的なメッセージ付きで例外を発生させてしまう
+			throw new VctRuntimeException("フォワード先URLが得られませんでした。"
+												+ "コントローラのメソッドに" + targetAnnotaion.getSimpleName() + "注釈を付け忘れていないか、確認してください。"
+											);
+		}
+		
+		// フォワード-AP内URL
+		return this.forwardForApp(forwardUrl, modelAndView);
 	}
 
 	/**

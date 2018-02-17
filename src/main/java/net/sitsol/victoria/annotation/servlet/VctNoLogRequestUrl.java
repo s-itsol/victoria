@@ -1,7 +1,7 @@
 /**
  *
  */
-package net.sitsol.victoria.setvlet.spring.annotation;
+package net.sitsol.victoria.annotation.servlet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

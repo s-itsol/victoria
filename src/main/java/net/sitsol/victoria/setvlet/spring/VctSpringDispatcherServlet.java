@@ -9,11 +9,13 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 
+import net.sitsol.victoria.annotation.servlet.VctFromMapping;
+import net.sitsol.victoria.annotation.servlet.VctNoAuth;
+import net.sitsol.victoria.annotation.servlet.VctNoLogRequestUrl;
 import net.sitsol.victoria.configs.VctStaticApParam;
 import net.sitsol.victoria.consts.VctHttpConst;
 import net.sitsol.victoria.consts.VctLogKeywordConst;
@@ -21,13 +23,13 @@ import net.sitsol.victoria.consts.VctUrlPathConst;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
 import net.sitsol.victoria.models.userinfo.IUserInfo;
-import net.sitsol.victoria.setvlet.spring.annotation.VctNoAuth;
-import net.sitsol.victoria.setvlet.spring.annotation.VctNoLogRequestUrl;
 import net.sitsol.victoria.threadlocals.ThreadLog4jNdc;
+import net.sitsol.victoria.threadlocals.ThreadMappingMethod;
 import net.sitsol.victoria.threadlocals.ThreadUserInfo;
 import net.sitsol.victoria.utils.statics.VctHttpUtils;
 import net.sitsol.victoria.utils.statics.VctReflectionUtils;
 import net.sitsol.victoria.utils.statics.VctServerUtils;
+import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
 /**
  * Spring-Dispatcherサーブレット
@@ -51,16 +53,23 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 		String userId = request.getSession().getId();
 		IUserInfo loginUserInfo = null;
 		
-		try ( ThreadLog4jNdc threadLog4jNdc = new ThreadLog4jNdc(userId);				// ※log4j-NDCメッセージ
+		try (
+				ThreadLog4jNdc threadLog4jNdc = new ThreadLog4jNdc(userId);				// ※log4j-NDCメッセージ
 				ThreadUserInfo threadUserInfo = new ThreadUserInfo(loginUserInfo);		// ※ログインユーザー情報
 		) {
 			// システム共通リクエスト属性値設定
 			request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
 			request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);							// ホスト名
 			
-			// 基底クラスのメソッド実行
-			super.doService(request, response);
+			// リクエストマッピングメソッド取得
+			Method requestMappingMethod = this.getRequestMappingMethod(request);
 			
+			try (
+					ThreadMappingMethod threadMappingMethod = new ThreadMappingMethod(requestMappingMethod)		// ※リクエストマッピングメソッド
+			) {
+				// 基底クラスのメソッド実行
+				super.doService(request, response);
+			}
 			
 			long execMillis = System.currentTimeMillis() - startMillis;			// 処理時間(ms) ※「終了時刻」－「開始時刻」
 			
@@ -89,17 +98,42 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	@Override
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		// リクエストマッピングメソッド取得
-		Method requestMappingMethod = this.getRequestMappingMethod(request);
-		
 		// HTTPリクエストURLログ出力
-		this.httpRequestUrlLog(request, response, requestMappingMethod);
+		this.httpRequestUrlLog(request, response);
 		
 		// 認証
-		this.auth(request, response, requestMappingMethod);
+		this.auth(request, response);
 		
 		// 基底クラスのメソッド実行
 		super.doDispatch(request, response);
+		
+		// TODO：検証が十分になったら消す予定
+		{
+			VctFromMapping targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctFromMapping.class);
+			
+			String formName = targetAnno != null ? targetAnno.name() : null;
+			
+			Boolean hasSession = null;
+			
+			Object form = formName != null ? request.getAttribute(formName) : null;
+			
+			if ( form != null ) {
+				hasSession = false;
+				
+			} else {
+				
+				form = formName != null ? request.getSession().getAttribute(formName) : null;
+				
+				if ( form != null ) {
+					hasSession = true;
+				}
+			}
+			
+			VctLogger.getLogger().debug("●マッピングフォーム名：[" + formName + "]"
+											+ ", 得られたフォーム：[" + ( form != null ? form.getClass().getSimpleName() : null ) + "]"
+											+ ", セッション保持：[" + hasSession + "]"
+										);
+		}
 	}
 
 	/**
@@ -142,17 +176,13 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	 * HTTPリクエストURLログ出力
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
-	 * @param requestMappingMethod リクエストマッピングメソッド
 	 */
-	protected void httpRequestUrlLog(HttpServletRequest request, HttpServletResponse response, Method requestMappingMethod) throws Exception {
+	protected void httpRequestUrlLog(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		if ( request == null || requestMappingMethod == null ) { return; }
+		if ( request == null ) { return; }
 		
-		// HTTPリクエストURLログ出力不要アノテーション取得
-		VctNoLogRequestUrl targetAnno = AnnotationUtils.findAnnotation(requestMappingMethod, VctNoLogRequestUrl.class);
-		
-		// ログ出力不要アノテーションあり
-		if ( targetAnno != null ) { return; }
+		// HTTPリクエストURLログ出力不要アノテーションあり
+		if ( VctSpringMvcUtils.hasCurrentThreadAnnotation(VctNoLogRequestUrl.class) ) { return; }
 		
 		// HTTPリクエストURLログ出力フラグOFF
 		if ( !VctStaticApParam.getInstance().isHttpRequestUrlLogOutputFlg() ) { return; }
@@ -168,37 +198,41 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	 * 認証
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
-	 * @param requestMappingMethod リクエストマッピングメソッド
 	 */
-	protected void auth(HttpServletRequest request, HttpServletResponse response, Method requestMappingMethod) throws Exception {
+	protected void auth(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		if ( request == null || requestMappingMethod == null ) { return; }
+		if ( request == null ) { return; }
 		
-		// 認証不要アノテーション取得
-		VctNoAuth targetAnno = AnnotationUtils.findAnnotation(requestMappingMethod, VctNoAuth.class);
+		// 現スレッド-マッピングメソッドが無い場合(≒静的コンテンツのリクエスト)は処理しない
+		if ( !ThreadMappingMethod.hasCurrentThreadMappingMethod() ) {
+			return;
+		}
 		
 		// 認証不要アノテーションあり
-		if ( targetAnno != null ) { return; }
+		if ( VctSpringMvcUtils.hasCurrentThreadAnnotation(VctNoAuth.class) ) { return; }
 		
 		// 認証判定
-		boolean isAuth = this.isAuth(request, response, requestMappingMethod);
+		boolean isAuth = this.isAuth(request, response);
 		
 		// 認証OK
 		if ( isAuth ) { return; }
 		
 		// ここまで来たら、セッションタイムアウト
-		this.doSessionTimeout(request, response, requestMappingMethod);
+		this.doSessionTimeout(request, response);
 	}
 
 	/**
 	 * 認証判定
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
-	 * @param handlerMethod ハンドラメソッド
 	 * @return 判定結果 ※true：認証OK ／ false：認証NG
 	 */
-	protected boolean isAuth(HttpServletRequest request, HttpServletResponse response, Method requestMappingMethod) throws Exception {
+	protected boolean isAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
+		// 現スレッド-マッピングメソッドの取得
+		Method requestMappingMethod = ThreadMappingMethod.getCurrentThreadMappingMethod();
+		
+		// 警告ログを出力しておく
 		VctLogger.getLogger().warn("デフォルトの認証判定が実行されたため「認証NG」を返します。"
 										+ "オーバーライド実装するか、" + VctNoAuth.class.getSimpleName() + "注釈を付けて認証判定をさせないようにしてください。"
 										+ "元リクエスト-メソッド名：[" + VctReflectionUtils.getSimpleClassMethodInfo(requestMappingMethod) + "]"
@@ -211,13 +245,16 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	 * セッションタイムアウト実行
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
-	 * @param requestMappingMethod リクエストマッピングメソッド
 	 */
-	protected void doSessionTimeout(HttpServletRequest request, HttpServletResponse response, Method requestMappingMethod) throws Exception {
+	protected void doSessionTimeout(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		// 現スレッド-マッピングメソッドの取得
+		Method requestMappingMethod = ThreadMappingMethod.getCurrentThreadMappingMethod();
 		
 		String forwardUrl = null;
 		
 		try {
+			// 警告ログを出力しておく
 			VctLogger.getLogger().warn("未認証のため、セッションタイムアウトURLへフォワードします。"
 											+ "元リクエスト-メソッド名：[" + VctReflectionUtils.getSimpleClassMethodInfo(requestMappingMethod) + "]"
 			);
