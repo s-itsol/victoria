@@ -3,9 +3,9 @@
  */
 package net.sitsol.victoria.consts;
 
-
 /**
  * victoria共通-URLパス定数クラス
+ *  ※定義してあるURLやディレクトリはデフォルト推奨
  * 
  * @author shibano
  */
@@ -36,6 +36,12 @@ public class VctUrlPathConst {
 	/** APコンテキストルート */
 	public class Root {
 		public static final String DIR = "/";
+		/** エラー情報 */
+		public class Errors {
+			public static final String DIR = Root.DIR + "errors/";
+			public static final String SYSTEMERROR_VM = DIR + VctUrlPathConst.SYSTEMERROR_VM;			// システムエラー
+			public static final String SESSIONTIMEOUT_VM	= DIR + VctUrlPathConst.SESSIONTIMEOUT_VM;	// セッションタイムアウト
+		}
 	}
 
 }

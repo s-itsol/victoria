@@ -41,6 +41,24 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * システムエラー-フォワード先URL取得
+	 * @return フォワード先URL
+	 */
+	protected String getSystemErrorForwardUrl() {
+		// ※デフォルト推奨-システムエラーURLパス
+		return VctUrlPathConst.Root.Errors.SYSTEMERROR_VM;
+	}
+
+	/**
+	 * セッションタイムアウト-フォワード先URL取得
+	 * @return フォワード先URL
+	 */
+	protected String getSessionTimeoutForwardUrl() {
+		// ※デフォルト推奨-セッションタイムアウトURLパス
+		return VctUrlPathConst.Root.Errors.SESSIONTIMEOUT_VM;
+	}
+
+	/**
 	 * サービス実行
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
@@ -48,8 +66,7 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		long startMillis = System.currentTimeMillis();							// 開始時刻
-		
+		// TODO：ログインはまだ
 		String userId = request.getSession().getId();
 		IUserInfo loginUserInfo = null;
 		
@@ -57,10 +74,6 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 				ThreadLog4jNdc threadLog4jNdc = new ThreadLog4jNdc(userId);				// ※log4j-NDCメッセージ
 				ThreadUserInfo threadUserInfo = new ThreadUserInfo(loginUserInfo);		// ※ログインユーザー情報
 		) {
-			// システム共通リクエスト属性値設定
-			request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
-			request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);							// ホスト名
-			
 			// リクエストマッピングメソッド取得
 			Method requestMappingMethod = this.getRequestMappingMethod(request);
 			
@@ -70,6 +83,66 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 				// 基底クラスのメソッド実行
 				super.doService(request, response);
 			}
+		}
+	}
+
+	/**
+	 * ディスパッチ実行
+	 * @param request HTTPサーブレットリクエスト
+	 * @param response HTTPサーブレットレスポンス
+	 */
+	@Override
+	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		long startMillis = System.currentTimeMillis();							// 開始時刻
+		
+		try {
+			// システム共通リクエスト属性値設定
+			request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
+			request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);							// ホスト名
+			
+			// HTTPリクエストURLログ出力
+			this.httpRequestUrlLog(request, response);
+			
+			// 認証
+			this.auth(request, response);
+			
+			// 基底クラスのメソッド実行
+			super.doDispatch(request, response);
+			
+			// TODO：検証が十分になったら消す予定
+			{
+				VctFromMapping targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctFromMapping.class);
+				
+				String formName = targetAnno != null ? targetAnno.name() : null;
+				
+				Boolean hasSession = null;
+				
+				Object form = formName != null ? request.getAttribute(formName) : null;
+				
+				if ( form != null ) {
+					hasSession = false;
+					
+				} else {
+					
+					form = formName != null ? request.getSession().getAttribute(formName) : null;
+					
+					if ( form != null ) {
+						hasSession = true;
+					}
+				}
+				
+				VctLogger.getLogger().debug("●マッピングフォーム名：[" + formName + "]"
+												+ ", 得られたフォーム：[" + ( form != null ? form.getClass().getSimpleName() : null ) + "]"
+												+ ", セッション保持：[" + hasSession + "]"
+											);
+			}
+			
+		} catch (Exception ex) {
+			// 例外ハンドラ実行
+			this.doExceptionHanler(request, response, ex);
+			
+		} finally {
 			
 			long execMillis = System.currentTimeMillis() - startMillis;			// 処理時間(ms) ※「終了時刻」－「開始時刻」
 			
@@ -87,52 +160,6 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 				
 				VctLogger.getLogger().warn(message.toString());
 			}
-		}
-	}
-
-	/**
-	 * ディスパッチ実行
-	 * @param request HTTPサーブレットリクエスト
-	 * @param response HTTPサーブレットレスポンス
-	 */
-	@Override
-	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
-		// HTTPリクエストURLログ出力
-		this.httpRequestUrlLog(request, response);
-		
-		// 認証
-		this.auth(request, response);
-		
-		// 基底クラスのメソッド実行
-		super.doDispatch(request, response);
-		
-		// TODO：検証が十分になったら消す予定
-		{
-			VctFromMapping targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctFromMapping.class);
-			
-			String formName = targetAnno != null ? targetAnno.name() : null;
-			
-			Boolean hasSession = null;
-			
-			Object form = formName != null ? request.getAttribute(formName) : null;
-			
-			if ( form != null ) {
-				hasSession = false;
-				
-			} else {
-				
-				form = formName != null ? request.getSession().getAttribute(formName) : null;
-				
-				if ( form != null ) {
-					hasSession = true;
-				}
-			}
-			
-			VctLogger.getLogger().debug("●マッピングフォーム名：[" + formName + "]"
-											+ ", 得られたフォーム：[" + ( form != null ? form.getClass().getSimpleName() : null ) + "]"
-											+ ", セッション保持：[" + hasSession + "]"
-										);
 		}
 	}
 
@@ -242,6 +269,49 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	}
 
 	/**
+	 * 例外ハンドラ実行
+	 * @param request HTTPサーブレットリクエスト
+	 * @param response HTTPサーブレットレスポンス
+	 * @param exception 発生例外
+	 */
+	protected void doExceptionHanler(HttpServletRequest request, HttpServletResponse response, Exception exception) {
+		
+		StringBuilder message = new StringBuilder();
+		{
+			message.append("サーブレット-リクエストでエラーが発生しました。システムエラーURLへフォワードします。");
+			
+			//クライアント情報収集
+			message.append("USER-AGENT：[").append(request.getHeader(VctHttpConst.USER_AGENT)).append("]");
+			message.append(", REFERER：[").append(request.getHeader(VctHttpConst.REFERER)).append("]");
+			message.append(", REQUEST-URL：[").append(request.getRequestURL()).append("]");
+		}
+		
+		// エラーログ出力
+		VctLogger.getLogger().error(message.toString(), exception);
+		
+		// HTTPエラーコード設定
+		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		
+		String forwardUrl = null;
+		
+		try {
+			// システムエラー-フォワード先URL取得
+			forwardUrl = this.getSystemErrorForwardUrl();
+			
+			// サーブレットフォワード実行
+			RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl);
+			dispatcher.forward(request, response);
+			
+		} catch (Exception ex) {
+			// メッセージを添えた例外をスローしておく
+			throw new VctRuntimeException("システムエラー時のフォワードでエラーが発生しました。"
+												+ "フォワード先URL：[" + forwardUrl + "]"
+											, ex
+										);
+		}
+	}
+
+	/**
 	 * セッションタイムアウト実行
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
@@ -274,20 +344,6 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 												, ex
 											);
 		}
-	}
-
-	/**
-	 * セッションタイムアウト-フォワード先URL取得
-	 * @return フォワード先URL
-	 */
-	protected String getSessionTimeoutForwardUrl() {
-		
-		VctLogger.getLogger().warn("デフォルトのセッションタイムアウト-フォワード先URL取得処理が実行されたため、"
-										+ "「APコンテキストルートURL」を返します。"
-										+ "任意のURLへフォワードさせたい場合は、オーバーライド実装してください。"
-									);
-		
-		return VctUrlPathConst.Root.DIR;
 	}
 
 }
