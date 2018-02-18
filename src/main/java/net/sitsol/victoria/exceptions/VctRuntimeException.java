@@ -13,7 +13,7 @@ public class VctRuntimeException extends RuntimeException {
 
 	/* -- static ----------------------------------------------------------- */
 
-	private static final long serialVersionUID = 6487660868566987247L;
+	private static final long serialVersionUID = 1L;
 	public static final int DEFAULT_ERROR_CODE = 100;						// デフォルトエラーコード
 
 

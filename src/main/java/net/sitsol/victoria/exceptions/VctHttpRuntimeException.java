@@ -14,7 +14,7 @@ public class VctHttpRuntimeException extends VctRuntimeException {
 
 	/* -- static ----------------------------------------------------------- */
 
-	private static final long serialVersionUID = 7705264402559636511L;
+	private static final long serialVersionUID = 1L;
 	public static final int DEFAULT_ERROR_CODE = 100;						// デフォルトエラーコード
 
 

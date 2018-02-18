@@ -1,14 +1,14 @@
 /**
- *
+ * 
  */
 package net.sitsol.victoria.exceptions;
 
 /**
- * 楽観排他エラー例外クラス
- *
+ * HTTPサーブレット-セッションタイムアウトをハンドリングさせるための例外クラス
+ * 
  * @author shibano
  */
-public class VctOptimisticLockException extends Exception {
+public class VctServletSessionTimeoutRuntimeException extends VctRuntimeException {
 
 	/* -- static ----------------------------------------------------------- */
 
@@ -30,7 +30,7 @@ public class VctOptimisticLockException extends Exception {
 	 * コンストラクタ
 	 * @param message エラーメッセージ
 	 */
-	public VctOptimisticLockException(String message) {
+	public VctServletSessionTimeoutRuntimeException(String message) {
 		super(message);
 	}
 

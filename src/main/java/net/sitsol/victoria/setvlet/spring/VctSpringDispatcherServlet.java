@@ -21,13 +21,14 @@ import net.sitsol.victoria.consts.VctHttpConst;
 import net.sitsol.victoria.consts.VctLogKeywordConst;
 import net.sitsol.victoria.consts.VctUrlPathConst;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
+import net.sitsol.victoria.exceptions.VctServletSessionTimeoutRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
 import net.sitsol.victoria.models.userinfo.IUserInfo;
 import net.sitsol.victoria.threadlocals.ThreadLog4jNdc;
 import net.sitsol.victoria.threadlocals.ThreadMappingMethod;
 import net.sitsol.victoria.threadlocals.ThreadUserInfo;
+import net.sitsol.victoria.utils.statics.VctExceptionUtils;
 import net.sitsol.victoria.utils.statics.VctHttpUtils;
-import net.sitsol.victoria.utils.statics.VctReflectionUtils;
 import net.sitsol.victoria.utils.statics.VctServerUtils;
 import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
@@ -98,8 +99,7 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 		
 		try {
 			// システム共通リクエスト属性値設定
-			request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
-			request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);							// ホスト名
+			this.setCommonRequestAttributes(request);
 			
 			// HTTPリクエストURLログ出力
 			this.httpRequestUrlLog(request, response);
@@ -111,7 +111,8 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 			super.doDispatch(request, response);
 			
 			// TODO：検証が十分になったら消す予定
-			{
+			if ( VctLogger.getLogger().isDebugEnabled() ) {
+				
 				VctFromMapping targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctFromMapping.class);
 				
 				String formName = targetAnno != null ? targetAnno.name() : null;
@@ -200,6 +201,17 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	}
 
 	/**
+	 * システム共通リクエスト属性値設定
+	 * @param request HTTPサーブレットリクエスト
+	 */
+	protected void setCommonRequestAttributes(HttpServletRequest request) throws Exception {
+		
+		// システム共通リクエスト属性値設定
+		request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
+		request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);							// ホスト名
+	}
+
+	/**
 	 * HTTPリクエストURLログ出力
 	 * @param request HTTPサーブレットリクエスト
 	 * @param response HTTPサーブレットレスポンス
@@ -208,11 +220,11 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 		
 		if ( request == null ) { return; }
 		
-		// HTTPリクエストURLログ出力不要アノテーションあり
-		if ( VctSpringMvcUtils.hasCurrentThreadAnnotation(VctNoLogRequestUrl.class) ) { return; }
-		
 		// HTTPリクエストURLログ出力フラグOFF
 		if ( !VctStaticApParam.getInstance().isHttpRequestUrlLogOutputFlg() ) { return; }
+		
+		// HTTPリクエストURLログ出力不要アノテーションあり
+		if ( VctSpringMvcUtils.hasCurrentThreadAnnotation(VctNoLogRequestUrl.class) ) { return; }
 		
 		// HTTPリクエストURLログ出力
 		StringBuilder message = new StringBuilder();
@@ -244,8 +256,8 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 		// 認証OK
 		if ( isAuth ) { return; }
 		
-		// ここまで来たら、セッションタイムアウト
-		this.doSessionTimeout(request, response);
+		// ここまで来たら、セッションタイムアウト例外をスロー ※例外ハンドラで処理させる用なので、メッセージは不要
+		throw new VctServletSessionTimeoutRuntimeException("");
 	}
 
 	/**
@@ -256,13 +268,10 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	 */
 	protected boolean isAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		// 現スレッド-マッピングメソッドの取得
-		Method requestMappingMethod = ThreadMappingMethod.getCurrentThreadMappingMethod();
-		
 		// 警告ログを出力しておく
 		VctLogger.getLogger().warn("デフォルトの認証判定が実行されたため「認証NG」を返します。"
 										+ "オーバーライド実装するか、" + VctNoAuth.class.getSimpleName() + "注釈を付けて認証判定をさせないようにしてください。"
-										+ "元リクエスト-メソッド名：[" + VctReflectionUtils.getSimpleClassMethodInfo(requestMappingMethod) + "]"
+										+ "リクエストURL：[" + request.getRequestURL() + "]"
 									);
 		
 		return false;
@@ -276,73 +285,51 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 	 */
 	protected void doExceptionHanler(HttpServletRequest request, HttpServletResponse response, Exception exception) {
 		
-		StringBuilder message = new StringBuilder();
-		{
-			message.append("サーブレット-リクエストでエラーが発生しました。システムエラーURLへフォワードします。");
+		//クライアント情報生成
+		StringBuilder clientInfoMessage = new StringBuilder();
+		clientInfoMessage.append("USER-AGENT：[").append(request.getHeader(VctHttpConst.USER_AGENT)).append("]");
+		clientInfoMessage.append(", REFERER：[").append(request.getHeader(VctHttpConst.REFERER)).append("]");
+		clientInfoMessage.append(", REQUEST-URL：[").append(request.getRequestURL()).append("]");
+		
+		String forwardUrl = null;			// フォワード先URL
+		
+		// セッションタイムアウト例外
+		if ( VctExceptionUtils.hasThrowable(exception, VctServletSessionTimeoutRuntimeException.class) ) {
 			
-			//クライアント情報収集
-			message.append("USER-AGENT：[").append(request.getHeader(VctHttpConst.USER_AGENT)).append("]");
-			message.append(", REFERER：[").append(request.getHeader(VctHttpConst.REFERER)).append("]");
-			message.append(", REQUEST-URL：[").append(request.getRequestURL()).append("]");
-		}
-		
-		// エラーログ出力
-		VctLogger.getLogger().error(message.toString(), exception);
-		
-		// HTTPエラーコード設定
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		
-		String forwardUrl = null;
-		
-		try {
-			// システムエラー-フォワード先URL取得
-			forwardUrl = this.getSystemErrorForwardUrl();
-			
-			// サーブレットフォワード実行
-			RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl);
-			dispatcher.forward(request, response);
-			
-		} catch (Exception ex) {
-			// メッセージを添えた例外をスローしておく
-			throw new VctRuntimeException("システムエラー時のフォワードでエラーが発生しました。"
-												+ "フォワード先URL：[" + forwardUrl + "]"
-											, ex
-										);
-		}
-	}
-
-	/**
-	 * セッションタイムアウト実行
-	 * @param request HTTPサーブレットリクエスト
-	 * @param response HTTPサーブレットレスポンス
-	 */
-	protected void doSessionTimeout(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
-		// 現スレッド-マッピングメソッドの取得
-		Method requestMappingMethod = ThreadMappingMethod.getCurrentThreadMappingMethod();
-		
-		String forwardUrl = null;
-		
-		try {
-			// 警告ログを出力しておく
-			VctLogger.getLogger().warn("未認証のため、セッションタイムアウトURLへフォワードします。"
-											+ "元リクエスト-メソッド名：[" + VctReflectionUtils.getSimpleClassMethodInfo(requestMappingMethod) + "]"
+			// 警告ログを出力しておく ※業務例外なので、スローしている箇所は決まっているため、スタックトレースは無し
+			VctLogger.getLogger().warn("サーブレット-リクエストで未認証を検知したため、セッションタイムアウトURLへフォワードします。"
+											+ clientInfoMessage.toString()
 			);
 			
-			// セッションタイムアウト-フォワード先URL取得
-			forwardUrl = this.getSessionTimeoutForwardUrl();
+			forwardUrl = this.getSessionTimeoutForwardUrl();		// セッションタイムアウト-フォワード先URL
 			
+		// その他(＝システムエラー)
+		} else {
+			
+			// エラーログ出力 ※スタックトレース付き
+			VctLogger.getLogger().error("サーブレット-リクエストでエラーが発生しました。システムエラーURLへフォワードします。"
+												+ clientInfoMessage.toString()
+											, exception
+			);
+			
+			forwardUrl = this.getSystemErrorForwardUrl();			// システムエラー-フォワード先URL;
+			
+			// HTTPエラーコード設定
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		
+		try {
 			// サーブレットフォワード実行
 			RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl);
 			dispatcher.forward(request, response);
 			
 		} catch (Exception ex) {
-			// メッセージを添えた例外をスローしておく
-			throw new VctRuntimeException("セッションタイムアウト時のフォワードでエラーが発生しました。"
-													+ "フォワード先URL：[" + forwardUrl + "]"
-													+ ", 元リクエスト-メソッド名：[" + VctReflectionUtils.getSimpleClassMethodInfo(requestMappingMethod) + "]"
-												, ex
-											);
+			// ※メッセージ付きの例外をスロー
+			throw new VctRuntimeException("例外ハンドラ後のフォワードにてエラーが発生しました。"
+												+ clientInfoMessage.toString()
+												+ ", フォワード先URL：[" + forwardUrl + "]"
+											, ex
+										);
 		}
 	}
 
