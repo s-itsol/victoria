@@ -314,8 +314,8 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 			
 			forwardUrl = this.getSystemErrorForwardUrl();			// システムエラー-フォワード先URL;
 			
-			// HTTPエラーコード設定
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			// HTTPエラーコード設定 ※サーバ側原因のエラーを示す「500：INTERNAL_SERVER_ERROR」としておく
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		
 		try {
