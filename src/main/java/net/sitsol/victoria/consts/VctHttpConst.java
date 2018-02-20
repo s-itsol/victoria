@@ -16,7 +16,7 @@ public class VctHttpConst {
 	// spring-mvc予約語定数
 	public static final String REDIRECT_PREFIX			= "redirect:";		// リダイレクト-プレフィックス
 
-	// HTTPヘッダ族税
+	// HTTPヘッダ属性
 	public static final String USER_AGENT				= "User-Agent";		// ユーザーエージェント
 	public static final String REFERER					= "Referer";		// リファラ
 
