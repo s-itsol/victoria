@@ -5,6 +5,7 @@ package net.sitsol.victoria.controllers;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 
 import net.sitsol.victoria.annotation.servlet.VctInputForward;
@@ -21,6 +22,13 @@ import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
  */
 public abstract class VctController {
 
+	@Autowired
+	HttpServletRequest request;
+	
+	protected HttpServletRequest getRequest() {
+		return request;
+	}
+	
 	/**
 	 * セッション内フォーム破棄
 	 * @param request HTTPサーブレットリクエスト
@@ -125,6 +133,8 @@ public abstract class VctController {
 	 * @return モデル＆ビュー情報
 	 */
 	protected ModelAndView forwardForApp(String forwardAppUrl, ModelAndView modelAndView) {
+		
+		this.getRequest().setAttribute("xxx", "渡せるのか？テスト");
 		
 		modelAndView.setViewName(forwardAppUrl);		// ※ビュー名：「フォワード先-AP内URL」
 		

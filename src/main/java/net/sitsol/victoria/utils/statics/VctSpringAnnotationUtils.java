@@ -47,4 +47,20 @@ public class VctSpringAnnotationUtils {
 		return AnnotationUtils.findAnnotation(targetMethod, targetAnnotationType);
 	}
 
+	/**
+	 * アノテーション取得
+	 * @param targetClazz 対象クラス
+	 * @param targetAnnotationType 対象アノテーション
+	 * @return アノテーション ※得られなかった場合(≒対象アノテーションが未設定)はnull
+	 */
+	public static <AnnotationClass extends Annotation> AnnotationClass findAnnotation(Class<?> targetClazz, Class<AnnotationClass> targetAnnotationType) {
+		
+		if ( targetClazz == null || targetAnnotationType == null ) {
+			return null;
+		}
+		
+		// 対象アノテーション取得 ※spring提供ユーティリティ
+		return AnnotationUtils.findAnnotation(targetClazz, targetAnnotationType);
+	}
+
 }

@@ -4,11 +4,19 @@
 package net.sitsol.victoria.setvlet.spring;
 
 import java.lang.reflect.Method;
+import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sitsol.victoria.annotation.servlet.VctNoAuth;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+
+import net.sitsol.victoria.annotation.servlet.VctFromMapping;
 import net.sitsol.victoria.annotation.servlet.VctNoLogRequestUrl;
 import net.sitsol.victoria.configs.VctStaticApParam;
 import net.sitsol.victoria.consts.VctHttpConst;
@@ -17,12 +25,6 @@ import net.sitsol.victoria.log4j.VctLogger;
 import net.sitsol.victoria.utils.statics.VctHttpUtils;
 import net.sitsol.victoria.utils.statics.VctServerUtils;
 import net.sitsol.victoria.utils.statics.VctSpringAnnotationUtils;
-import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
-
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
  * Springハンドラ・インターセプタ
@@ -179,7 +181,7 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 		if ( !VctStaticApParam.getInstance().isHttpRequestUrlLogOutputFlg() ) { return; }
 		
 		// HTTPリクエストURLログ出力不要アノテーションあり
-		if ( VctSpringMvcUtils.hasCurrentThreadAnnotation(VctNoLogRequestUrl.class) ) { return; }
+		if ( VctSpringAnnotationUtils.hasAnnotation(mappingMethod, VctNoLogRequestUrl.class) ) { return; }
 		
 		// HTTPリクエストURLログ出力
 		StringBuilder message = new StringBuilder();
@@ -203,10 +205,10 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 		
 		if ( request == null ) { return; }
 		
-		// 認証不要アノテーションありは処理しない
-		if ( VctSpringAnnotationUtils.hasAnnotation(mappingMethod, VctNoAuth.class) ) {
-			return;
-		}
+//		// 認証不要アノテーションありは処理しない
+//		if ( VctSpringAnnotationUtils.hasAnnotation(mappingMethod, VctNoAuth.class) ) {
+//			return;
+//		}
 		
 		// ●●●TODO：
 	}
@@ -220,19 +222,46 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	 */
 	protected void methodPostHandle(HttpServletRequest request, HttpServletResponse response, Method mappingMethod, ModelAndView modelAndView) throws Exception {
 		
-//		if ( modelAndView != null ) {
-//			
-//			String formName = AgoraThreadMappingMethodUtils.getFromMappingName();
-//			
-//			if ( formName != null ) {
-//				Object obj = modelAndView.getModelMap().get(formName);
-//				
-//				if ( obj != null ) {
-//					request.setAttribute(formName, obj);
-//				}
-//			}
-//		}
-//		セッションの属性名を、マッピングフォーム名(＝先頭が大文字)にしようとしたが無理だった
+		System.out.println("★methodPostHandle-request:" + request.getAttribute("xxx"));
+		
+		// ●●●TODO：
+		if ( modelAndView != null ) {
+			
+			System.out.println("★methodPostHandle-modelAndView:" + modelAndView.getModelMap().get("xxx"));
+			//	→こちらはダメだった
+			
+			VctFromMapping targetAnno = VctSpringAnnotationUtils.findAnnotation(mappingMethod, VctFromMapping.class);
+			
+			String formName  = targetAnno != null ? targetAnno.name() : null;
+			
+			if ( formName != null ) {
+				
+				SessionAttributes sessAttrs = VctSpringAnnotationUtils.findAnnotation(mappingMethod.getDeclaringClass(), SessionAttributes.class);
+				
+				if ( sessAttrs != null ) {
+					
+					for ( int idx = 0; idx < sessAttrs.types().length; idx++) {
+						
+						String sessAttrName = sessAttrs.names()[idx];
+						
+						if ( !formName.equals(sessAttrName) ) {
+							continue;
+						}
+						
+						Class<?> sessAttrType = sessAttrs.types()[idx];
+						
+						String sessFromName = StringUtils.uncapitalize( sessAttrType.getSimpleName() );
+						Object formObj = request.getSession().getAttribute(sessFromName);
+						
+						if ( formObj != null ) {
+							modelAndView.addObject(formName, formObj);
+						}
+						
+						break;
+					}
+				}
+			}
+		}
 		
 		
 	}
@@ -246,6 +275,16 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	 */
 	protected void methodAfterCompletion(HttpServletRequest request, HttpServletResponse response, Method mappingMethod, Exception exception) throws Exception {
 		// ※派生クラス側でオーバーライド実装させる想定なので、こちらでは特に処理なし。
+		
+		System.out.println("★methodAfterCompletion-request:" + request.getAttribute("xxx"));
+
+		// ●●●TODO：
+		Enumeration<String> sesNames = request.getSession().getAttributeNames();
+		
+		while ( sesNames.hasMoreElements() ) {
+			String sesName = sesNames.nextElement();
+			System.out.println(sesName + " -> " + request.getSession().getAttribute(sesName));
+		}
 	}
 
 }
