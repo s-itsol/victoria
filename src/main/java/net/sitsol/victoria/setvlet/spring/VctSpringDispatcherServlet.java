@@ -208,7 +208,7 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 		
 		// システム共通リクエスト属性値設定
 		request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
-		request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);							// ホスト名
+		request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);								// ホスト名
 	}
 
 	/**

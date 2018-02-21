@@ -6,14 +6,15 @@ package net.sitsol.victoria.setvlet.velocity.tools.spring;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import net.sitsol.victoria.annotation.servlet.VctFromMapping;
+import net.sitsol.victoria.forms.VctFrom;
+import net.sitsol.victoria.setvlet.velocity.tools.BsVctVelocityTool;
+import net.sitsol.victoria.utils.statics.VctReflectionUtils;
+import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
+
 import org.apache.velocity.tools.Scope;
 import org.apache.velocity.tools.config.DefaultKey;
 import org.apache.velocity.tools.config.ValidScope;
-
-import net.sitsol.victoria.annotation.servlet.VctFromMapping;
-import net.sitsol.victoria.forms.VctFrom;
-import net.sitsol.victoria.utils.statics.VctReflectionUtils;
-import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
 /**
  * Victoria共通 Spring-Velocity-Tools「フォームツール」
@@ -22,13 +23,12 @@ import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
  */
 @DefaultKey("form")
 @ValidScope(Scope.REQUEST)
-public class VctFromTool {
+public class VctFromTool extends BsVctVelocityTool {
 
 	// -------------------------------------------------------------------------
 	//  field
 	// -------------------------------------------------------------------------
 
-	protected HttpServletRequest request;				// HTTPサーブレットリクエスト
 	protected HttpSession session;						// HTTPセッション
 
 
@@ -43,12 +43,12 @@ public class VctFromTool {
 	 * @param request HTTPサーブレットリクエスト
 	 */
 	public void setRequest(HttpServletRequest request) {
+		super.setRequest(request);
 		
 		if ( request == null ) {
 			throw new NullPointerException("HTTPサーブレットリクエストのインスタンスにnullが設定されました。");
 		}
 		
-		this.request = request;
 		this.session = request.getSession(false);
 	}
 
@@ -81,13 +81,13 @@ public class VctFromTool {
 			Object fromObj = null;
 			{
 				// セッションから優先して取得
-				if ( this.session != null ) {
-					fromObj = this.session.getAttribute(formName);
+				if ( this.getSession() != null ) {
+					fromObj = this.getSession().getAttribute(formName);
 				}
 				
 				// 得られなかった場合はリクエストから取得
 				if ( fromObj == null ) {
-					fromObj = this.request.getAttribute(formName);
+					fromObj = this.getRequest().getAttribute(formName);
 				}
 			}
 			
@@ -98,6 +98,13 @@ public class VctFromTool {
 		}
 		
 		return retObj;
+	}
+
+
+	/*-- setter・getter ------------------------------------------------------*/
+
+	public HttpSession getSession() {
+		return session;
 	}
 
 }
