@@ -6,13 +6,17 @@ package net.sitsol.victoria.controllers;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.ModelAndView;
 
 import net.sitsol.victoria.annotation.servlet.VctInputForward;
 import net.sitsol.victoria.annotation.servlet.VctSuccessForward;
 import net.sitsol.victoria.consts.VctHttpConst;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
+import net.sitsol.victoria.forms.VctForm;
 import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.utils.statics.VctReflectionUtils;
 import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
 /**
@@ -22,13 +26,24 @@ import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
  */
 public abstract class VctController {
 
-	@Autowired
+	@Autowired(required = false)
 	HttpServletRequest request;
 	
 	protected HttpServletRequest getRequest() {
 		return request;
 	}
 	
+	@InitBinder()
+	public void resetDemoSearchFrom(HttpServletRequest request, WebDataBinder binder) {
+		
+		Object targetObj = binder.getTarget();
+		
+		if ( targetObj != null && VctReflectionUtils.hasSuperClass(targetObj.getClass(), VctForm.class) ) {
+			((VctForm) targetObj).reset();
+		}
+		
+	}
+
 	/**
 	 * セッション内フォーム破棄
 	 * @param request HTTPサーブレットリクエスト

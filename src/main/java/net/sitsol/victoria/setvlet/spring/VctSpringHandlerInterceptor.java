@@ -222,12 +222,12 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	 */
 	protected void methodPostHandle(HttpServletRequest request, HttpServletResponse response, Method mappingMethod, ModelAndView modelAndView) throws Exception {
 		
-		System.out.println("★methodPostHandle-request:" + request.getAttribute("xxx"));
+//		System.out.println("★methodPostHandle-request:" + request.getAttribute("xxx"));
 		
 		// ●●●TODO：
 		if ( modelAndView != null ) {
 			
-			System.out.println("★methodPostHandle-modelAndView:" + modelAndView.getModelMap().get("xxx"));
+//			System.out.println("★methodPostHandle-modelAndView:" + modelAndView.getModelMap().get("xxx"));
 			//	→こちらはダメだった
 			
 			VctFromMapping targetAnno = VctSpringAnnotationUtils.findAnnotation(mappingMethod, VctFromMapping.class);
@@ -276,15 +276,21 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	protected void methodAfterCompletion(HttpServletRequest request, HttpServletResponse response, Method mappingMethod, Exception exception) throws Exception {
 		// ※派生クラス側でオーバーライド実装させる想定なので、こちらでは特に処理なし。
 		
-		System.out.println("★methodAfterCompletion-request:" + request.getAttribute("xxx"));
+//		System.out.println("★methodAfterCompletion-request:" + request.getAttribute("xxx"));
 
 		// ●●●TODO：
 		Enumeration<String> sesNames = request.getSession().getAttributeNames();
 		
+		System.out.println("▼▼▼セッション属性情報▼▼▼");
 		while ( sesNames.hasMoreElements() ) {
 			String sesName = sesNames.nextElement();
-			System.out.println(sesName + " -> " + request.getSession().getAttribute(sesName));
+			
+			
+			if ( VctLogger.getLogger().isDebugEnabled() ) {
+				VctLogger.getLogger().debug("セッション属性名：[" + sesName + "] -> クラス：[" + request.getSession().getAttribute(sesName).getClass().getSimpleName() + "]");
+			}
 		}
+		System.out.println("▲▲▲セッション属性情報▲▲▲");
 	}
 
 }

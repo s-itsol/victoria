@@ -13,7 +13,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 
-import net.sitsol.victoria.annotation.servlet.VctFromMapping;
 import net.sitsol.victoria.annotation.servlet.VctNoAuth;
 import net.sitsol.victoria.annotation.servlet.VctNoLogRequestUrl;
 import net.sitsol.victoria.configs.VctStaticApParam;
@@ -109,35 +108,6 @@ public class VctSpringDispatcherServlet extends DispatcherServlet {
 			
 			// 基底クラスのメソッド実行
 			super.doDispatch(request, response);
-			
-			// TODO：検証が十分になったら消す予定
-			if ( VctLogger.getLogger().isDebugEnabled() ) {
-				
-				VctFromMapping targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctFromMapping.class);
-				
-				String formName = targetAnno != null ? targetAnno.name() : null;
-				
-				Boolean hasSession = null;
-				
-				Object form = formName != null ? request.getAttribute(formName) : null;
-				
-				if ( form != null ) {
-					hasSession = false;
-					
-				} else {
-					
-					form = formName != null ? request.getSession().getAttribute(formName) : null;
-					
-					if ( form != null ) {
-						hasSession = true;
-					}
-				}
-				
-				VctLogger.getLogger().debug("●マッピングフォーム名：[" + formName + "]"
-												+ ", 得られたフォーム：[" + ( form != null ? form.getClass().getSimpleName() : null ) + "]"
-												+ ", セッション保持：[" + hasSession + "]"
-											);
-			}
 			
 		} catch (Exception ex) {
 			// 例外ハンドラ実行

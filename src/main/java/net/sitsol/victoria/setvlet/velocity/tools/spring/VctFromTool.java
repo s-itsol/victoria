@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import net.sitsol.victoria.annotation.servlet.VctFromMapping;
-import net.sitsol.victoria.forms.VctFrom;
+import net.sitsol.victoria.forms.VctForm;
 import net.sitsol.victoria.setvlet.velocity.tools.BsVctVelocityTool;
 import net.sitsol.victoria.utils.statics.VctReflectionUtils;
 import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
@@ -68,7 +68,7 @@ public class VctFromTool extends BsVctVelocityTool {
 	 * マッピングされたフォームのインスタンス取得
 	 * @return フォームのインスタンス
 	 */
-	public VctFrom getBean() {
+	public VctForm getBean() {
 		
 		String formName = this.getName();
 		
@@ -76,7 +76,7 @@ public class VctFromTool extends BsVctVelocityTool {
 			return null;
 		}
 		
-		VctFrom retObj = null;
+		VctForm retObj = null;
 		{
 			Object fromObj = null;
 			{
@@ -92,8 +92,8 @@ public class VctFromTool extends BsVctVelocityTool {
 			}
 			
 			// フォーム基底クラスのインスタンスであればキャストして戻り値にする
-			if ( fromObj != null && VctReflectionUtils.hasSuperClass(fromObj.getClass(), VctFrom.class) ) {
-				retObj = (VctFrom) fromObj;
+			if ( fromObj != null && VctReflectionUtils.hasSuperClass(fromObj.getClass(), VctForm.class) ) {
+				retObj = (VctForm) fromObj;
 			}
 		}
 		
