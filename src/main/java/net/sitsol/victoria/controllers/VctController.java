@@ -3,6 +3,8 @@
  */
 package net.sitsol.victoria.controllers;
 
+import java.lang.reflect.Method;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +12,13 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.ModelAndView;
 
-import net.sitsol.victoria.annotation.servlet.VctInputForward;
 import net.sitsol.victoria.annotation.servlet.VctSuccessForward;
 import net.sitsol.victoria.consts.VctHttpConst;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.forms.VctForm;
 import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.utils.statics.VctAnnotationAccessUtils;
 import net.sitsol.victoria.utils.statics.VctReflectionUtils;
-import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
 /**
  * victoria共通-コントローラ 基底クラス
@@ -27,21 +28,33 @@ import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 public abstract class VctController {
 
 	@Autowired(required = false)
-	HttpServletRequest request;
-	
+	private HttpServletRequest request;		// HTTPサーブレットリクエスト
+
+	/**
+	 * HTTPサーブレットリクエスト取得
+	 * @return HTTPサーブレットリクエスト
+	 */
 	protected HttpServletRequest getRequest() {
 		return request;
 	}
 	
+	/**
+	 * バインド前フォーム初期化
+	 * @param request HTTPサーブレットリクエスト
+	 * @param binder WEBデータバインダー
+	 */
 	@InitBinder()
-	public void resetDemoSearchFrom(HttpServletRequest request, WebDataBinder binder) {
+	public void resetFrom(HttpServletRequest request, WebDataBinder binder) {
 		
 		Object targetObj = binder.getTarget();
 		
-		if ( targetObj != null && VctReflectionUtils.hasSuperClass(targetObj.getClass(), VctForm.class) ) {
-			((VctForm) targetObj).reset();
+		if ( targetObj == null || !VctReflectionUtils.hasSuperClass(targetObj.getClass(), VctForm.class) ) {
+			return;
 		}
 		
+		VctForm form = (VctForm) targetObj;
+		
+		form.reset();
 	}
 
 	/**
@@ -49,14 +62,20 @@ public abstract class VctController {
 	 * @param request HTTPサーブレットリクエスト
 	 * @param removeFormName フォーム名
 	 */
+	@Deprecated
 	protected void removeSessionFrom(HttpServletRequest request, String removeFormName) {
 		
 		if ( request == null || request.getSession() == null ) {
 			return;
 		}
 		
+		// マッピングメソッド取得
+		Method mappingMethod = (Method) this.getRequest().getAttribute(VctHttpConst.REQ_MAPPING_METHOD);
+		
+		String sessFromName = VctAnnotationAccessUtils.getFromMappingSessionName(mappingMethod);
+		
 		// セッションからフォームを破棄
-		request.getSession().removeAttribute(removeFormName);
+		request.getSession().removeAttribute(sessFromName);
 	}
 
 	/**
@@ -75,11 +94,11 @@ public abstract class VctController {
 	 */
 	protected ModelAndView inputForward(ModelAndView modelAndView) {
 		
-		// 入力フォワード先URLアノテーション取得
-		VctInputForward targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctInputForward.class);
+		// マッピングメソッド取得
+		Method mappingMethod = (Method) this.getRequest().getAttribute(VctHttpConst.REQ_MAPPING_METHOD);
 		
 		// フォワード先URL取得
-		String forwardUrl = targetAnno != null ? targetAnno.url() : null;
+		String forwardUrl = VctAnnotationAccessUtils.getInputForwardUrl(mappingMethod);
 		
 		// アノテーション指定フォワード実行
 		return this.doAnnotationForward(VctSuccessForward.class, forwardUrl, modelAndView);
@@ -101,11 +120,11 @@ public abstract class VctController {
 	 */
 	protected ModelAndView succsessForward(ModelAndView modelAndView) {
 		
-		// 正常終了フォワード先URLアノテーション取得
-		VctSuccessForward targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctSuccessForward.class);
+		// マッピングメソッド取得
+		Method mappingMethod = (Method) this.getRequest().getAttribute(VctHttpConst.REQ_MAPPING_METHOD);
 		
 		// フォワード先URL取得
-		String forwardUrl = targetAnno != null ? targetAnno.url() : null;
+		String forwardUrl = VctAnnotationAccessUtils.getSuccessForwardUrl(mappingMethod);
 		
 		// アノテーション指定フォワード実行
 		return this.doAnnotationForward(VctSuccessForward.class, forwardUrl, modelAndView);

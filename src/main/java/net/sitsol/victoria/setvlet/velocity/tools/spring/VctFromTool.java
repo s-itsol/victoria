@@ -3,18 +3,20 @@
  */
 package net.sitsol.victoria.setvlet.velocity.tools.spring;
 
+import java.lang.reflect.Method;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import net.sitsol.victoria.annotation.servlet.VctFromMapping;
-import net.sitsol.victoria.forms.VctForm;
-import net.sitsol.victoria.setvlet.velocity.tools.BsVctVelocityTool;
-import net.sitsol.victoria.utils.statics.VctReflectionUtils;
-import net.sitsol.victoria.utils.statics.VctSpringMvcUtils;
 
 import org.apache.velocity.tools.Scope;
 import org.apache.velocity.tools.config.DefaultKey;
 import org.apache.velocity.tools.config.ValidScope;
+
+import net.sitsol.victoria.consts.VctHttpConst;
+import net.sitsol.victoria.forms.VctForm;
+import net.sitsol.victoria.setvlet.velocity.tools.BsVctVelocityTool;
+import net.sitsol.victoria.utils.statics.VctAnnotationAccessUtils;
+import net.sitsol.victoria.utils.statics.VctReflectionUtils;
 
 /**
  * Victoria共通 Spring-Velocity-Tools「フォームツール」
@@ -58,10 +60,11 @@ public class VctFromTool extends BsVctVelocityTool {
 	 */
 	public String getName() {
 		
-		// フォーム名マッピング-アノテーション取得
-		VctFromMapping targetAnno = VctSpringMvcUtils.findCurrentThreadAnnotation(VctFromMapping.class);
+		// マッピングメソッド取得
+		Method mappingMethod = (Method) this.getRequest().getAttribute(VctHttpConst.REQ_MAPPING_METHOD);
 		
-		return targetAnno != null ? targetAnno.name() : null;
+		// フォームマッピング名取得
+		return VctAnnotationAccessUtils.getFromMappingName(mappingMethod);
 	}
 
 	/**

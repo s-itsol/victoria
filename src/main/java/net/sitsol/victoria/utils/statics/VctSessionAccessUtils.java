@@ -39,6 +39,16 @@ public class VctSessionAccessUtils {
 	}
 
 	/**
+	 * セッション属性破棄
+	 * @param request HTTPサーブレットリクエスト
+	 * @param sessionName セッション名
+	 */
+	protected static void removeSessionAttribute(HttpServletRequest request, String sessionName) {
+		// セッション属性破棄
+		request.getSession().removeAttribute(sessionName);
+	}
+
+	/**
 	 * セッション属性取得
 	 * @param request HTTPサーブレットリクエスト
 	 * @param sessionName セッション名

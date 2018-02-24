@@ -9,22 +9,20 @@ import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
-import net.sitsol.victoria.annotation.servlet.VctFromMapping;
-import net.sitsol.victoria.annotation.servlet.VctNoLogRequestUrl;
 import net.sitsol.victoria.configs.VctStaticApParam;
 import net.sitsol.victoria.consts.VctHttpConst;
 import net.sitsol.victoria.consts.VctLogKeywordConst;
+import net.sitsol.victoria.exceptions.VctServletSessionTimeoutRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.threadlocals.ThreadUserInfo;
+import net.sitsol.victoria.utils.statics.VctAnnotationAccessUtils;
 import net.sitsol.victoria.utils.statics.VctHttpUtils;
 import net.sitsol.victoria.utils.statics.VctServerUtils;
-import net.sitsol.victoria.utils.statics.VctSpringAnnotationUtils;
 
 /**
  * Springハンドラ・インターセプタ
@@ -34,17 +32,12 @@ import net.sitsol.victoria.utils.statics.VctSpringAnnotationUtils;
 public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 
 	/**
-	 * デフォルトコンストラクタ
-	 */
-	public VctSpringHandlerInterceptor() { }
-
-	/**
 	 * コントローラ処理前イベント通知
 	 * @param handler ハンドラのインスタンス
 	 * @return 処理継続フラグ ※true：処理を継続する ／ false：処理を中断する(＝以降の処理を実施しない)
 	 */
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	public final boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		
 		// 静的コンテンツだった場合は何もしない
 		if ( handler instanceof ResourceHttpRequestHandler ) {
@@ -152,7 +145,7 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 		// HTTPリクエストURLログ出力
 		this.httpRequestUrlLog(request, mappingMethod);
 		
-		// 認証
+		// 認証q11
 		this.auth(request, mappingMethod);
 	}
 
@@ -164,6 +157,8 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	protected void setCommonRequestAttributes(HttpServletRequest request, Method mappingMethod) throws Exception {
 		
 		// システム共通リクエスト属性値設定
+		request.setAttribute(VctHttpConst.REQ_ST_TIME_MILLIS, System.currentTimeMillis());				// リクエスト開始時刻(ms)
+		request.setAttribute(VctHttpConst.REQ_MAPPING_METHOD, mappingMethod);							// リクエストマッピングメソッド
 		request.setAttribute(VctHttpConst.ENV_NAME, VctStaticApParam.getInstance().getDispEnvName());		// 環境名
 		request.setAttribute(VctHttpConst.HOST_NAME, VctServerUtils.HOST_NAME);								// ホスト名
 	}
@@ -173,15 +168,15 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	 * @param request HTTPサーブレットリクエスト
 	 * @param mappingMethod マッピングメソッド
 	 */
-	protected void httpRequestUrlLog(HttpServletRequest request, Method mappingMethod) throws Exception {
+	private void httpRequestUrlLog(HttpServletRequest request, Method mappingMethod) throws Exception {
 		
 		if ( request == null ) { return; }
 		
+		// HTTPリクエストURLログ出力不要
+		if ( VctAnnotationAccessUtils.isNoLogRequestUrl(mappingMethod) ) { return; }
+		
 		// HTTPリクエストURLログ出力フラグOFF
 		if ( !VctStaticApParam.getInstance().isHttpRequestUrlLogOutputFlg() ) { return; }
-		
-		// HTTPリクエストURLログ出力不要アノテーションあり
-		if ( VctSpringAnnotationUtils.hasAnnotation(mappingMethod, VctNoLogRequestUrl.class) ) { return; }
 		
 		// HTTPリクエストURLログ出力
 		StringBuilder message = new StringBuilder();
@@ -205,12 +200,16 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 		
 		if ( request == null ) { return; }
 		
-//		// 認証不要アノテーションありは処理しない
-//		if ( VctSpringAnnotationUtils.hasAnnotation(mappingMethod, VctNoAuth.class) ) {
-//			return;
-//		}
+		// 認証不要なら処理しない
+		if ( VctAnnotationAccessUtils.isNoAuth(mappingMethod) ) {
+			return;
+		}
 		
-		// ●●●TODO：
+		// ユーザー情報が得られなかった場合
+		if ( ThreadUserInfo.getCurrentThreadUserInfo() == null ) {
+			// セッションタイムアウト例外をスロー ※例外ハンドラで処理させる用なので、メッセージは不要
+			throw new VctServletSessionTimeoutRuntimeException("");
+		}
 	}
 
 	/**
@@ -222,48 +221,37 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	 */
 	protected void methodPostHandle(HttpServletRequest request, HttpServletResponse response, Method mappingMethod, ModelAndView modelAndView) throws Exception {
 		
-//		System.out.println("★methodPostHandle-request:" + request.getAttribute("xxx"));
+		// セッションマッピングしたフォームのモデル転記
+		this.setSessionMappingFromToModel(request, mappingMethod, modelAndView);
+	}
+
+	/**
+	 * セッションマッピングしたフォームのモデル転記
+	 * @param request HTTPサーブレットリクエスト
+	 * @param mappingMethod マッピングメソッド
+	 * @param modelAndView モデル＆ビュー
+	 */
+	private void setSessionMappingFromToModel(HttpServletRequest request, Method mappingMethod, ModelAndView modelAndView) throws Exception {
 		
-		// ●●●TODO：
-		if ( modelAndView != null ) {
-			
-//			System.out.println("★methodPostHandle-modelAndView:" + modelAndView.getModelMap().get("xxx"));
-			//	→こちらはダメだった
-			
-			VctFromMapping targetAnno = VctSpringAnnotationUtils.findAnnotation(mappingMethod, VctFromMapping.class);
-			
-			String formName  = targetAnno != null ? targetAnno.name() : null;
-			
-			if ( formName != null ) {
-				
-				SessionAttributes sessAttrs = VctSpringAnnotationUtils.findAnnotation(mappingMethod.getDeclaringClass(), SessionAttributes.class);
-				
-				if ( sessAttrs != null ) {
-					
-					for ( int idx = 0; idx < sessAttrs.types().length; idx++) {
-						
-						String sessAttrName = sessAttrs.names()[idx];
-						
-						if ( !formName.equals(sessAttrName) ) {
-							continue;
-						}
-						
-						Class<?> sessAttrType = sessAttrs.types()[idx];
-						
-						String sessFromName = StringUtils.uncapitalize( sessAttrType.getSimpleName() );
-						Object formObj = request.getSession().getAttribute(sessFromName);
-						
-						if ( formObj != null ) {
-							modelAndView.addObject(formName, formObj);
-						}
-						
-						break;
-					}
-				}
-			}
-		}
+		if ( modelAndView == null ) { return; }
 		
+		// マッピングしたフォーム名取得
+		String formName = VctAnnotationAccessUtils.getFromMappingName(mappingMethod);
 		
+		if ( formName == null ) { return; }
+		
+		// マッピングしたフォームのセッション属性名取得
+		String sessFromName = VctAnnotationAccessUtils.getFromMappingSessionName(mappingMethod);
+		
+		if ( sessFromName == null ) { return; }
+		
+		// セッション内フォームのインスタンス取得
+		Object sessFormObj = request.getSession().getAttribute(sessFromName);
+		
+		if ( sessFormObj == null ) { return; }
+		
+		// フォームマッピング属性名で、セッションフォームのインスタンスを設定しておく
+		modelAndView.addObject(formName, sessFormObj);
 	}
 
 	/**
@@ -274,10 +262,10 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 	 * @param exception スローされた例外 ※スローされていない場合はnull
 	 */
 	protected void methodAfterCompletion(HttpServletRequest request, HttpServletResponse response, Method mappingMethod, Exception exception) throws Exception {
-		// ※派生クラス側でオーバーライド実装させる想定なので、こちらでは特に処理なし。
 		
-//		System.out.println("★methodAfterCompletion-request:" + request.getAttribute("xxx"));
-
+		// HTTPリクエスト処理時間警告ログ出力
+		this.httpRequestWarnTimeLog(request);
+		
 		// ●●●TODO：
 		Enumeration<String> sesNames = request.getSession().getAttributeNames();
 		
@@ -291,6 +279,39 @@ public class VctSpringHandlerInterceptor extends HandlerInterceptorAdapter {
 			}
 		}
 		System.out.println("▲▲▲セッション属性情報▲▲▲");
+	}
+
+	/**
+	 * HTTPリクエスト処理時間警告ログ出力
+	 * @param request HTTPサーブレットリクエスト
+	 */
+	private void httpRequestWarnTimeLog(HttpServletRequest request) {
+		
+		// リクエスト開始時刻(ms)
+		Object startTimeMillisObj = request.getAttribute(VctHttpConst.REQ_ST_TIME_MILLIS);
+		
+		long startMillis = ( startTimeMillisObj != null && startTimeMillisObj instanceof Long )
+								? ((Long) startTimeMillisObj).longValue()
+								: -1
+		;
+		
+		// 処理時間(ms) ※「終了時刻」－「開始時刻」
+		long execMillis = System.currentTimeMillis() - startMillis;	
+		
+		// HTTP要求の警告時間(ms)
+		int warnMillis = VctStaticApParam.getInstance().getWarningHttpRequestExecuteMillis();
+		
+		// 超過していた場合
+		if ( execMillis >= warnMillis ) {
+			
+			// HTTP要求-処理時間警告ログ出力
+			StringBuilder message = new StringBuilder();
+			message.append(VctLogKeywordConst.WARNTIME).append(" ").append(warnMillis).append("(ms)を超過したHTTP要求がありました。");
+			message.append("処理時間：[").append(execMillis).append("](ms)");
+			message.append(", 要求URL：[").append(VctHttpUtils.createUrlQueryString(request)).append("]");
+			
+			VctLogger.getLogger().warn(message.toString());
+		}
 	}
 
 }

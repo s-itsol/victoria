@@ -1,7 +1,5 @@
 package net.sitsol.victoria.threadlocals;
 
-import org.apache.commons.lang.StringUtils;
-
 import net.sitsol.victoria.consts.VctConst;
 import net.sitsol.victoria.models.userinfo.IUserInfo;
 
@@ -57,19 +55,12 @@ public class ThreadUserInfo implements AutoCloseable {
 	 * @return ユーザーID
 	 */
 	public static String getCurrentThreadUserId() {
-
-		String userId = VctConst.UNNOWN_USER_ID;		// デフォルト：特定不能
-		{
-			// 現スレッド-ユーザー情報の取得
-			IUserInfo userProfile = ThreadUserInfo.getCurrentThreadUserInfo();
-			// ユーザーIDが得られた場合
-			if ( userProfile != null && !StringUtils.isEmpty(userProfile.getUserId()) ) {
-				// ユーザーIDを確保
-				userId = userProfile.getUserId();
-			}
-		}
-
-		return userId;
+		
+		// 現スレッド-ユーザー情報の取得
+		IUserInfo userProfile = ThreadUserInfo.getCurrentThreadUserInfo();
+		
+		// ユーザー情報が得られたらユーザーIDを返す
+		return userProfile != null ? userProfile.getUserId() : VctConst.UNNOWN_USER_ID;
 	}
 
 
