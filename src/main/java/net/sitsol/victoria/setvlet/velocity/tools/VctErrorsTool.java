@@ -21,7 +21,7 @@ import org.apache.velocity.tools.config.ValidScope;
  * 
  * @author shibano
  */
-@DefaultKey("form")
+@DefaultKey("errors")
 @ValidScope(Scope.REQUEST)
 public class VctErrorsTool extends BsVctVelocityTool {
 
