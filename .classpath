@@ -25,7 +25,6 @@
 	<classpathentry kind="lib" path="/victoria-libs/spring-aop-4.3.9.RELEASE.jar" sourcepath="/victoria-libs/src/spring-aop-4.3.9.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-web-4.3.9.RELEASE.jar" sourcepath="/victoria-libs/src/spring-web-4.3.9.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-expression-4.3.9.RELEASE.jar" sourcepath="/victoria-libs/src/spring-expression-4.3.9.RELEASE-sources.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/spring-context-support-4.3.9.RELEASE.jar" sourcepath="/victoria-libs/src/spring-context-support-4.3.9.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/velocity-1.7.jar" sourcepath="/victoria-libs/src/velocity-1.7-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/velocity-tools-2.0.jar" sourcepath="/victoria-libs/src/velocity-tools-2.0-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
