@@ -6,7 +6,7 @@
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jasper.jar" sourcepath="/TOMCAT_HOME/apache-tomcat-8.5.31-src.zip"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jsp-api.jar" sourcepath="/TOMCAT_HOME/apache-tomcat-8.5.31-src.zip"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/el-api.jar" sourcepath="/TOMCAT_HOME/apache-tomcat-8.5.31-src.zip"/>
-	<classpathentry kind="var" path="TOMCAT_HOME/lib/annotations-api.jar"/>
+	<classpathentry kind="var" path="TOMCAT_HOME/lib/annotations-api.jar" sourcepath="/TOMCAT_HOME/apache-tomcat-8.5.31-src.zip"/>
 	<classpathentry kind="lib" path="/victoria-libs/commons-beanutils-1.7.0.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/commons-collections-3.1.jar"/>
@@ -18,8 +18,8 @@
 	<classpathentry kind="lib" path="/victoria-libs/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/commons-validator-1.5.1.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/reactive-streams-1.0.2.jar"/>
-	<classpathentry kind="lib" path="/victoria-libs/reactor-core-3.1.8.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/reactive-streams-1.0.2.jar" sourcepath="/victoria-libs/src/reactive-streams-1.0.2-sources.jar"/>
+	<classpathentry kind="lib" path="/victoria-libs/reactor-core-3.1.8.RELEASE.jar" sourcepath="/victoria-libs/src/reactor-core-3.1.8.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-aop-5.0.7.RELEASE.jar" sourcepath="/victoria-libs/src/spring-aop-5.0.7.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-beans-5.0.7.RELEASE.jar" sourcepath="/victoria-libs/src/spring-beans-5.0.7.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="/victoria-libs/spring-context-5.0.7.RELEASE.jar" sourcepath="/victoria-libs/src/spring-context-5.0.7.RELEASE-sources.jar"/>
