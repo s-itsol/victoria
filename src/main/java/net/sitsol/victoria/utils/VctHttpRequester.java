@@ -13,14 +13,13 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.sitsol.victoria.configs.VctStaticApParam;
 import net.sitsol.victoria.exceptions.VctHttpRuntimeException;
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 import net.sitsol.victoria.log4j.VctLogger;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Parameter;
 
 /**
  * HTTPリクエスト支援クラス
@@ -77,7 +76,7 @@ public class VctHttpRequester {
 	 * @param parameterList リクエストパラメータ ※nullの場合はパラメータなし
 	 * @return 応答結果文字列
 	 */
-	public String httpPost(String requestUrl, List<Parameter> parameterList) {
+	public String httpPost(String requestUrl, List<Pair<String, String>> parameterList) {
 		return this.httpRequest(requestUrl, true, parameterList);
 	}
 
@@ -88,7 +87,7 @@ public class VctHttpRequester {
 	 * @param parameterList リクエストパラメータ ※nullの場合はパラメータなし
 	 * @return 応答結果文字列
 	 */
-	protected String httpRequest(String requestUrl, boolean isPost, List<Parameter> parameterList) {
+	protected String httpRequest(String requestUrl, boolean isPost, List<Pair<String, String>> parameterList) {
 
 		HttpURLConnection con = null;
 		StringBuilder responseStr = new StringBuilder();
@@ -203,17 +202,16 @@ public class VctHttpRequester {
 	 * @param parameterList リクエストパラメータ
 	 * @return リクエストパラメータ-クエリストリング文字列
 	 */
-	private String createParameterQueryString(List<Parameter> parameterList) {
+	private String createParameterQueryString(List<Pair<String, String>> parameterList) {
 
 		StringBuilder parameterQueryString = new StringBuilder();
 
 		// パラメータループ
-		for ( Parameter parameter : parameterList ) {
+		for ( Pair<String, String> parameter : parameterList ) {
 
 			// 無効なPOSTパラメータは無視する
-			if ( StringUtils.isEmpty(parameter._name)
-				|| parameter._value == null
-				|| !( parameter._value instanceof String )
+			if ( StringUtils.isEmpty(parameter.getKey())
+				|| StringUtils.isEmpty(parameter.getValue())
 			) {
 				continue;
 			}
@@ -224,7 +222,7 @@ public class VctHttpRequester {
 			}
 
 			// POSTパラメータ追加
-			parameterQueryString.append(parameter._name).append("=").append((String) parameter._value);
+			parameterQueryString.append(parameter.getKey()).append("=").append(parameter.getValue());
 		}
 
 		return parameterQueryString.toString();

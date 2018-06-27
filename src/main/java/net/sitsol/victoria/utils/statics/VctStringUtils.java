@@ -3,6 +3,9 @@
  */
 package net.sitsol.victoria.utils.statics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -167,6 +170,106 @@ public class VctStringUtils {
 		}
 
 		return str;
+	}
+
+	public static String[] parseCsvLine(String csvLineStr) {
+		
+		if ( StringUtils.isEmpty(csvLineStr) ) {
+			return new String[0];
+		}
+		
+		List<int[]> valueFromToIdxList = createParseCsvLineFromToIdxList(csvLineStr);
+		
+		String[] csvItems = new String[valueFromToIdxList.size()];
+		{
+			// 
+			for ( int itemIdx = 0; itemIdx < valueFromToIdxList.size(); itemIdx++ ) {
+				
+				int[] valueFromToIdx = valueFromToIdxList.get(itemIdx);
+				int fromIdx		= valueFromToIdx[0];
+				int toIdx		= valueFromToIdx[1];
+				
+				csvItems[itemIdx] = StringUtils.replace(csvLineStr.substring(fromIdx, toIdx), "\"\"", "\"");
+			}
+		}
+		
+		return csvItems;
+	}
+
+	private static List<int[]> createParseCsvLineFromToIdxList(String csvLineStr) {
+		
+		List<int[]> valueFromToIdxList = new ArrayList<>();
+		{
+			// From・To位置確定ループ
+			for ( int fromCharIdx = 0; fromCharIdx < csvLineStr.length(); ) {
+				
+				char fromCurrentChar = csvLineStr.charAt(fromCharIdx);
+				char fromNextChar = fromCharIdx < csvLineStr.length() ? csvLineStr.charAt(fromCharIdx + 1) : ',';		// ※終端に達していたら「,」扱い
+				
+				boolean isCoverRead = false;
+				
+				// 現在「=」、次「"」
+				if ( fromCurrentChar == '=' && fromNextChar == '"' ) {
+					fromCharIdx = fromCharIdx + 2;				// 2文字進める
+					isCoverRead = true;							// 囲いあり項目フラグON
+				
+				// 現在「"」
+				} else if ( fromCurrentChar == '"' ) {
+					fromCharIdx = fromCharIdx + 1;				// 1文字進める
+					isCoverRead = true;							// 囲いあり項目フラグON
+				}
+				
+				
+				int plusNextFromIdx = 0;
+				int toCharIdx = fromCharIdx;
+				
+				// To位置確定ループ
+				for ( ; toCharIdx < csvLineStr.length(); ) {
+					
+					char toCurrentChar = csvLineStr.charAt(toCharIdx);
+					char toNextChar = toCharIdx < csvLineStr.length() ? csvLineStr.charAt(toCharIdx + 1) : ',';		// ※終端に達していたら「,」扱い
+					
+					// 囲いあり項目
+					if ( isCoverRead ) {
+						
+						// 現在「"」、次「"」
+						if ( toCurrentChar == '"' && toNextChar == '"' ) {
+							toCharIdx = toCharIdx + 2;			// 2文字進めて、次のTo確定ループ処理へ
+							continue;
+						}
+						
+						// 現在「"」、次「,」
+						if ( toCurrentChar == '"' && toNextChar == ',' ) {
+							plusNextFromIdx = 2;				// 次のFrom位置は、2文字分を読み飛ばす
+							break;								// To位置確定ループ終了
+						}
+						
+					// 囲いなし項目
+					} else {
+						
+						// 現在「,」
+						if ( toCurrentChar == ',' ) {
+							plusNextFromIdx = 1;				// 次のFrom位置は、1文字分を読み飛ばす
+							break;								// To位置確定ループ終了
+						}
+					}
+					
+					toCharIdx = toCharIdx + 1;					// 1文字進めて、次のTo確定ループ処理へ
+				}
+				
+				// From・To位置リストへ追加
+				{
+					int fromIdx = fromCharIdx;
+					int toIdx = toCharIdx;
+					
+					valueFromToIdxList.add( new int[] {fromIdx, toIdx} );
+				}
+				
+				fromCharIdx = toCharIdx + plusNextFromIdx;		// 次のFrom位置を進めて、次のFrom・To確定ループ処理へ
+			}
+		}
+		
+		return valueFromToIdxList;
 	}
 
 	/**

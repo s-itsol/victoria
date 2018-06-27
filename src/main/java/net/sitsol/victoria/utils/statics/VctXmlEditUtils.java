@@ -16,13 +16,15 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 import net.sitsol.victoria.exceptions.VctRuntimeException;
 
@@ -37,6 +39,8 @@ public class VctXmlEditUtils {
 	private static DocumentBuilder builder_ = null;
 	// １度取得したJAXBコンテンツはマップ ※生成に時間がかかるため、シングルトン
 	private static Map<String, JAXBContext> jaxbContentMap_ = new HashMap<String, JAXBContext>();
+	// トランスフォーマー ※生成に時間がかかるため、シングルトン
+    private static Transformer transformer_ = null;
 
 	/**
 	 * コンストラクタ ※外部からインスタンス化させない
@@ -77,6 +81,21 @@ public class VctXmlEditUtils {
 	}
 
 	/**
+	 * トランスフォーマーの取得
+	 * @return トランスフォーマーのインスタンス
+	 */
+	protected static Transformer getTransformer() throws TransformerConfigurationException {
+		
+		if ( transformer_ == null ) {
+			// デフォルトのトランスフォーマー生成
+			TransformerFactory factory = TransformerFactory.newInstance();
+			transformer_ = factory.newTransformer();
+		}
+
+		return transformer_;
+	}
+
+	/**
 	 * XML文字列→DOMへ変換
 	 * @param xmlString XML文字列
 	 * @return XMLドキュメント
@@ -110,10 +129,12 @@ public class VctXmlEditUtils {
 		try {
 			// 文字列出力クラス生成
 			StringWriter writer = new StringWriter();
+			StreamResult result = new StreamResult(writer);
 
-			// シリアライズ
-			XMLSerializer serializer = new XMLSerializer(writer, new OutputFormat(document));
-			serializer.serialize(document);
+			// トランスフォーマー取得
+			Transformer transformer = getTransformer();
+			// XML文字列へ変換
+			transformer.transform(new DOMSource(document), result);
 
 			// xmlタグの後ろの改行を除外して戻す
 			return StringUtils.replaceOnce(writer.toString(), "\n", StringUtils.EMPTY);

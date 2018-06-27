@@ -7,17 +7,16 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import net.sitsol.victoria.exceptions.VctRuntimeException;
-import net.sitsol.victoria.log4j.VctLogger;
-import net.sitsol.victoria.utils.statics.VctHttpUtils;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Parameter;
+import net.sitsol.victoria.exceptions.VctRuntimeException;
+import net.sitsol.victoria.log4j.VctLogger;
+import net.sitsol.victoria.utils.statics.VctHttpUtils;
 
 /**
  * HTTPリクエスト支援クラス
@@ -60,7 +59,7 @@ public class HttpRequester {
 	 * @param parameterList リクエストパラメータ ※nullの場合はパラメータなし
 	 * @return 応答結果文字列
 	 */
-	public String httpPost(String url, List<Parameter> parameterList) {
+	public String httpPost(String url, List<Pair<String, String>> parameterList) {
 		return this.httpRequest(url, true, parameterList);
 	}
 
@@ -71,7 +70,7 @@ public class HttpRequester {
 	 * @param parameterList	リクエストパラメータ ※nullの場合はパラメータなし
 	 * @return 応答結果文字列
 	 */
-	protected String httpRequest(String url, boolean isPost, List<Parameter> parameterList) {
+	protected String httpRequest(String url, boolean isPost, List<Pair<String, String>> parameterList) {
 
 		StringBuilder responsStr = new StringBuilder();
 		BufferedReader reader = null;
@@ -87,17 +86,16 @@ public class HttpRequester {
 				// リクエストパラメータあり
 				if ( parameterList != null ) {
 					// パラメータループ
-					for ( Parameter parameter : parameterList ) {
+					for ( Pair<String, String> parameter : parameterList ) {
 						// 無効なPOSTパラメータは無視する
-						if ( StringUtils.isEmpty(parameter._name)
-							|| parameter._value == null
-							|| !( parameter._value instanceof String )
+						if ( StringUtils.isEmpty(parameter.getKey())
+							|| StringUtils.isEmpty(parameter.getValue())
 						) {
 							continue;
 						}
 
 						// POSTパラメータ追加
-						((PostMethod) httpMethod).addParameter(parameter._name, (String) parameter._value);
+						((PostMethod) httpMethod).addParameter(parameter.getKey(), parameter.getValue());
 					}
 				}
 
