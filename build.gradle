@@ -1,3 +1,7 @@
+// spring-bootバージョンに合わせたライブラリ依存管理を使わせる
+plugins {
+    id 'org.springframework.boot' version '2.0.3.RELEASE'
+}
 
 println('--------------------------------------------------------------------------------')
 println(' [victoria]ビルド開始')
@@ -10,29 +14,34 @@ tasks.withType(JavaCompile) {
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'io.spring.dependency-management'
 
 group = 'net.sitsol.victoria'
 version = '0.0.1'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
-    compile 'commons-beanutils:commons-beanutils:latest.release'
-    compile 'commons-codec:commons-codec:latest.release'
-    compile 'commons-httpclient:commons-httpclient:latest.release'
-    compile 'commons-io:commons-io:latest.release'
-    compile 'commons-lang:commons-lang:latest.release'
-    compile 'commons-validator:commons-validator:latest.release'
-    compile 'javax.servlet:javax.servlet-api:3.1.0'					// ※サーブレットはバージョン固定にしておく
-    compile 'log4j:log4j:latest.release'
-    compile 'org.apache.commons:commons-lang3:latest.release'
-    compile 'org.apache.velocity:velocity:latest.release'
-    compile 'org.apache.velocity:velocity-tools:latest.release'
-    compile 'org.springframework:spring-webmvc:latest.release'
-    compile 'org.springframework:spring-webflux:latest.release'
-    testCompile 'junit:junit:4.12'
+	
+	// spring-bootバージョンに合わせたライブラリ(＝バージョン指定なし)
+	testCompile 'junit:junit'
+	compile 'commons-beanutils:commons-beanutils'
+	compile 'commons-codec:commons-codec'
+	compile 'javax.servlet:javax.servlet-api'
+	compile 'org.apache.commons:commons-lang3'
+	compile 'org.springframework:spring-webmvc'
+	compile 'org.springframework:spring-webflux'
+	
+	// バージョン指定ありライブラリ
+	compile 'commons-httpclient:commons-httpclient:latest.release'
+	compile 'commons-io:commons-io:latest.release'
+	compile 'commons-lang:commons-lang:latest.release'
+	compile 'commons-validator:commons-validator:latest.release'
+	compile 'log4j:log4j:latest.release'
+	compile 'org.apache.velocity:velocity:latest.release'
+	compile 'org.apache.velocity:velocity-tools:latest.release'
 }
+
