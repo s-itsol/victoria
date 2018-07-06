@@ -45,3 +45,10 @@ dependencies {
 	compile 'org.apache.velocity:velocity-tools:latest.release'
 }
 
+bootJar {
+	enabled = false;		// ライブラリなので、実行可能jar作成は実施しない
+}
+
+jar {
+	enabled = true;			// 依存先プロジェクト用に、jar作成は実施する
+}
