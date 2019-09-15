@@ -3,6 +3,7 @@
  */
 package net.sitsol.victoria.utils.statics;
 
+import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -114,8 +115,8 @@ public class VctXmlEditUtils {
 		} catch ( Exception ex ) {
 			throw new VctRuntimeException("XML文字列→DOMへの変換でエラーが発生しました。"
 												+ "XML文字列：[" + xmlString + "]"
-												, ex
-											);
+											, ex
+			);
 		}
 	}
 
@@ -173,10 +174,10 @@ public class VctXmlEditUtils {
 
 		} catch ( Exception ex ) {
 			throw new VctRuntimeException("XML文字列→JAXBエレメントへの変換でエラーが発生しました。"
-													+ "XML文字列：[" + xmlString + "]"
-													+ ", JAXBエレメント型：[" + className + "]"
-												, ex
-											);
+												+ "XML文字列：[" + xmlString + "]"
+												+ ", JAXBエレメント型：[" + className + "]"
+											, ex
+			);
 		}
 	}
 
@@ -210,9 +211,62 @@ public class VctXmlEditUtils {
 
 		} catch ( Exception ex ) {
 			throw new VctRuntimeException("JAXBエレメント→XML文字列への変換でエラーが発生しました。"
-													+ "JAXBエレメント型：[" + className + "]"
-												, ex
-											);
+												+ "JAXBエレメント型：[" + className + "]"
+											, ex
+			);
+		}
+	}
+
+	/**
+	 * DOM→XMLファイル出力
+	 *  ※XMLファイルは改行やインデントなし
+	 * @param document XMLドキュメント
+	 * @param outFilePath 出力先ファイルパス
+	 */
+	public static void domToXmlFile(Document document, String outFilePath) {
+		
+		try {
+			File outfile = new File(outFilePath);
+			
+			// ディレクトリ情報取得
+			File dirInfo = new File(outfile.getParent());
+			
+			// ディレクトリが存在しない場合、作成しておく
+			if ( !dirInfo.exists() ) {
+				dirInfo.mkdirs();
+			}
+			
+			// トランスフォーマー生成
+			Transformer transformer = VctXmlEditUtils.getTransformer();
+			
+			transformer.transform(new DOMSource(document), new StreamResult(outfile));
+			
+		} catch (Exception ex) {
+			throw new VctRuntimeException(	"DOM→XMLファイル出力でエラーが発生しました。"
+												+ "出力先ファイルパス：[" + outFilePath + "]"
+											, ex
+			);
+		}
+	}
+
+	/**
+	 * XMLファイル読込み→DOM
+	 * @param readFilePath 読込みファイルパス
+	 */
+	public static Document xmlFileToDom(String readFilePath) {
+		
+		try {
+			// ドキュメントビルダー生成
+			DocumentBuilder builder = VctXmlEditUtils.getDocumentBuilder();
+			
+			// XML解析
+			return builder.parse(new File(readFilePath));
+			
+		} catch (Exception ex) {
+			throw new VctRuntimeException(	"XMLファイル読込み→DOMへの変換でエラーが発生しました。"
+												+ "読込みファイルパス：[" + readFilePath + "]"
+											, ex
+			);
 		}
 	}
 
